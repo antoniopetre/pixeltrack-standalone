@@ -44,12 +44,12 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           clusModuleStart[0] = moduleStart[0] = 0;
         }
 
-        //for(uint32_t i : cms::alpakatools::elements_with_stride(acc, gpuClustering::MaxNumModules)) { nClustersInModule[i] = 0; }
-        cms::alpakatools::for_each_element_in_grid_strided(
-            acc, gpuClustering::MaxNumModules, [&](uint32_t i) { nClustersInModule[i] = 0; });
+        for(uint32_t i : cms::alpakatools::elements_with_stride(acc, gpuClustering::MaxNumModules)) { nClustersInModule[i] = 0; }
+        //cms::alpakatools::for_each_element_in_grid_strided(
+        //    acc, gpuClustering::MaxNumModules, [&](uint32_t i) { nClustersInModule[i] = 0; });
 
-        cms::alpakatools::for_each_element_in_grid_strided(acc, numElements, [&](uint32_t i) {
-        //for(uint32_t i : cms::alpakatools::elements_with_stride(acc, numElements)) {
+        //cms::alpakatools::for_each_element_in_grid_strided(acc, numElements, [&](uint32_t i) {
+        for(uint32_t i : cms::alpakatools::elements_with_stride(acc, numElements)) {
           if (id[i] != InvId) {
             float conversionFactor = (isRun2) ? (id[i] < 96 ? VCaltoElectronGain_L1 : VCaltoElectronGain) : 1.f;
             float offset = (isRun2) ? (id[i] < 96 ? VCaltoElectronOffset_L1 : VCaltoElectronOffset) : 0;
@@ -72,8 +72,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
               adc[i] = std::max(100, int(vcal * conversionFactor + offset));
             }
           }
-        });
-        //}
+        //});
+        }
       }
     };
   }  // namespace gpuCalibPixel
