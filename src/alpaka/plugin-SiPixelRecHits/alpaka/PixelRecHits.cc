@@ -11,14 +11,14 @@ namespace {
                                   pixelCPEforGPU::ParamsOnGPU const* cpeParams,
                                   uint32_t* hitsLayerStart) const {
       assert(0 == hitsModuleStart[0]);
-      for(uint32_t i : cms::alpakatools::elements_with_stride(acc, 11)) {
-      //cms::alpakatools::for_each_element_in_grid(acc, 11, [&](uint32_t i) {
+      //for(uint32_t i : cms::alpakatools::elements_with_stride(acc, 11)) {
+      cms::alpakatools::for_each_element_in_grid(acc, 11, [&](uint32_t i) {
         hitsLayerStart[i] = hitsModuleStart[cpeParams->layerGeometry().layerStart[i]];
 #ifdef GPU_DEBUG
         printf("LayerStart %d %d: %d\n", i, cpeParams->layerGeometry().layerStart[i], hitsLayerStart[i]);
 #endif
-      //});
-      }
+      });
+      //}
     }
   };
 }  // namespace
