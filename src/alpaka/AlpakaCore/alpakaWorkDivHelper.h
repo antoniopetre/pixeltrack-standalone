@@ -350,14 +350,14 @@ namespace cms {
 
         const Idx blockDimension(alpaka::getWorkDiv<alpaka::Block, alpaka::Elems>(acc)[dimIndex]);
         const Idx gridDimension(alpaka::getWorkDiv<alpaka::Grid, alpaka::Elems>(acc)[dimIndex]);
-        elementIdxShift += blockIdxInGrid * blockDimension;
+        // elementIdxShift += blockIdxInGrid * blockDimension;
 
         thread_ = blockDimension * blockIdxInGrid + threadIdxLocal;
         thread_ = thread_ + elementIdxShift;  // Add the shift
         stride_ = blockDimension * gridDimension;
         blockDim = blockDimension;
 
-        extent_ = extent + elementIdxShift;
+        extent_ = extent;
       }
 
       class iterator {
