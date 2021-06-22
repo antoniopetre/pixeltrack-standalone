@@ -22,14 +22,16 @@ namespace cms {
                                     T const *__restrict__ v,
                                     uint32_t const *__restrict__ offsets) const {
         const uint32_t nt = offsets[nh];
-        cms::alpakatools::for_each_element_in_grid_strided(acc, nt, [&](uint32_t i) {
+        for(uint32_t i : cms::alpakatools::elements_with_stride(acc, nt)) {
+        //cms::alpakatools::for_each_element_in_grid_strided(acc, nt, [&](uint32_t i) {
           auto off = alpaka_std::upper_bound(offsets, offsets + nh + 1, i);
           assert((*off) > 0);
           int32_t ih = off - offsets - 1;
           assert(ih >= 0);
           assert(ih < int(nh));
           h->count(acc, v[i], ih);
-        });
+        //});
+        }
       }
     };
 
@@ -41,14 +43,17 @@ namespace cms {
                                     T const *__restrict__ v,
                                     uint32_t const *__restrict__ offsets) const {
         const uint32_t nt = offsets[nh];
-        cms::alpakatools::for_each_element_in_grid_strided(acc, nt, [&](uint32_t i) {
+
+        for(uint32_t i : cms::alpakatools::elements_with_stride(acc, nt)) {
+        //cms::alpakatools::for_each_element_in_grid_strided(acc, nt, [&](uint32_t i) {
           auto off = alpaka_std::upper_bound(offsets, offsets + nh + 1, i);
           assert((*off) > 0);
           int32_t ih = off - offsets - 1;
           assert(ih >= 0);
           assert(ih < int(nh));
           h->fill(acc, v[i], i, ih);
-        });
+        //});
+        }
       }
     };
 
@@ -250,7 +255,8 @@ namespace cms {
           return;
         }
 
-        cms::alpakatools::for_each_element_in_grid_strided(acc, totbins(), m, [&](uint32_t i) { off[i] = n; });
+        //cms::alpakatools::for_each_element_in_grid_strided(acc, totbins(), m, [&](uint32_t i) { off[i] = n; });
+        for(uint32_t i : cms::alpakatools::elements_with_stride(acc, totbins(), m)) { off[i] = n; }
       }
 
       template <typename T_Acc>
