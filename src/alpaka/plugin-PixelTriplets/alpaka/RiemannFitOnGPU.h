@@ -47,8 +47,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 #endif
 
       const auto nt = Rfit::maxNumberOfConcurrentFits();
-      //for(uint32_t local_idx : cms::alpakatools::elements_with_stride(acc, nt)) {
-      cms::alpakatools::for_each_element_in_grid_strided(acc, nt, [&](uint32_t local_idx) {
+      for(uint32_t local_idx : cms::alpakatools::elements_with_stride(acc, nt)) {
+      //cms::alpakatools::for_each_element_in_grid_strided(acc, nt, [&](uint32_t local_idx) {
         auto tuple_idx = local_idx + offset;
         if (tuple_idx >= tupleMultiplicity->size(nHits))
           return;
@@ -84,8 +84,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         assert(fast_fit(1) == fast_fit(1));
         assert(fast_fit(2) == fast_fit(2));
         assert(fast_fit(3) == fast_fit(3));
-      });
-      //}
+      //});
+      }
 
     }  // kernel operator()
   };   // struct
@@ -109,7 +109,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
       // look in bin for this hit multiplicity
       const auto nt = Rfit::maxNumberOfConcurrentFits();
-      cms::alpakatools::for_each_element_in_grid_strided(acc, nt, [&](uint32_t local_idx) {
+      for(uint32_t local_idx : cms::alpakatools::elements_with_stride(acc, nt)) {
+      //cms::alpakatools::for_each_element_in_grid_strided(acc, nt, [&](uint32_t local_idx) {
         auto tuple_idx = local_idx + offset;
         if (tuple_idx >= tupleMultiplicity->size(nHits))
           return;
@@ -130,7 +131,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 //  printf("kernelCircleFit circle.par(0,1,2): %d %f,%f,%f\n", tkid,
 //         circle_fit[local_idx].par(0), circle_fit[local_idx].par(1), circle_fit[local_idx].par(2));
 #endif
-      });
+      //});
+      }
 
     }  // kernel operator()
   };   // struct
@@ -156,7 +158,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
       // look in bin for this hit multiplicity
       const auto nt = Rfit::maxNumberOfConcurrentFits();
-      cms::alpakatools::for_each_element_in_grid_strided(acc, nt, [&](uint32_t local_idx) {
+      for(uint32_t local_idx : cms::alpakatools::elements_with_stride(acc, nt)) {
+      //cms::alpakatools::for_each_element_in_grid_strided(acc, nt, [&](uint32_t local_idx) {
         auto tuple_idx = local_idx + offset;
         if (tuple_idx >= tupleMultiplicity->size(nHits))
           return;
@@ -196,7 +199,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                line_fit.cov(0, 0),
                line_fit.cov(1, 1));
 #endif
-      });
+      //});
+      }
 
     }  // kernel operator()
   };   // struct

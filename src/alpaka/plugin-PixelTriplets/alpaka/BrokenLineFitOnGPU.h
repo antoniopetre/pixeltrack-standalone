@@ -53,7 +53,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 #endif
 
       const auto nt = Rfit::maxNumberOfConcurrentFits();
-      cms::alpakatools::for_each_element_in_grid_strided(acc, nt, [&](uint32_t local_idx) {
+
+      for(uint32_t local_idx : cms::alpakatools::elements_with_stride(acc, nt)) {
+      //cms::alpakatools::for_each_element_in_grid_strided(acc, nt, [&](uint32_t local_idx) {
         auto tuple_idx = local_idx + offset;
         if (tuple_idx >= tupleMultiplicity->size(nHits))
           return;
@@ -115,7 +117,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         assert(fast_fit(1) == fast_fit(1));
         assert(fast_fit(2) == fast_fit(2));
         assert(fast_fit(3) == fast_fit(3));
-      });
+      //});
+      }
 
     }  // kernel operator()
   };   // struct
@@ -144,7 +147,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
       //for (int local_idx = local_start, nt = Rfit::maxNumberOfConcurrentFits(); local_idx < nt;
       //local_idx += gridDim.x * blockDim.x) {
       const auto nt = Rfit::maxNumberOfConcurrentFits();
-      cms::alpakatools::for_each_element_in_grid_strided(acc, nt, [&](uint32_t local_idx) {
+      for(uint32_t local_idx : cms::alpakatools::elements_with_stride(acc, nt)) {
+      //cms::alpakatools::for_each_element_in_grid_strided(acc, nt, [&](uint32_t local_idx) {
         auto tuple_idx = local_idx + offset;
         if (tuple_idx >= tupleMultiplicity->size(nHits))
           return;
@@ -191,7 +195,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                line.cov(0, 0),
                line.cov(1, 1));
 #endif
-      });
+      //});
+      }
 
     }  // kernel operator()
   };   // struct

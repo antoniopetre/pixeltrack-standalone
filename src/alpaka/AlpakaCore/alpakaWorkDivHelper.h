@@ -342,20 +342,22 @@ namespace cms {
 
       ALPAKA_FN_ACC elements_with_stride(const T_Acc& acc,
                                          T extent,
-                                         const Idx elementIdxShift = 0,
-                                         const unsigned int dimIndex = 0)
-          : extent_(extent + elementIdxShift) {
+                                         Idx elementIdxShift = 0,
+                                         const unsigned int dimIndex = 0) {
 
         const Idx threadIdxLocal(alpaka::getIdx<alpaka::Block, alpaka::Threads>(acc)[dimIndex]);
         const Idx blockIdxInGrid(alpaka::getIdx<alpaka::Grid, alpaka::Blocks>(acc)[dimIndex]);
 
         const Idx blockDimension(alpaka::getWorkDiv<alpaka::Block, alpaka::Elems>(acc)[dimIndex]);
         const Idx gridDimension(alpaka::getWorkDiv<alpaka::Grid, alpaka::Elems>(acc)[dimIndex]);
+        elementIdxShift += blockIdxInGrid * blockDimension;
 
         thread_ = blockDimension * blockIdxInGrid + threadIdxLocal;
         thread_ = thread_ + elementIdxShift;  // Add the shift
         stride_ = blockDimension * gridDimension;
         blockDim = blockDimension;
+
+        extent_ = extent + elementIdxShift;
       }
 
       class iterator {
