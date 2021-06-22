@@ -366,8 +366,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                     bool includeErrors,
                                     bool debug) const {
 
-        for(uint32_t iloop : cms::alpakatools::elements_with_stride(acc, wordCounter)) {
-        //cms::alpakatools::for_each_element_in_grid_strided(acc, wordCounter, [&](uint32_t iloop) {
+        //for(uint32_t iloop : cms::alpakatools::elements_with_stride(acc, wordCounter)) {
+        cms::alpakatools::for_each_element_in_grid_strided(acc, wordCounter, [&](uint32_t iloop) {
           auto gIndex = iloop;
           xx[gIndex] = 0;
           yy[gIndex] = 0;
@@ -470,8 +470,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           pdigi[gIndex] = ::pixelgpudetails::pack(globalPix.row, globalPix.col, adc[gIndex]);
           moduleId[gIndex] = detId.moduleId;
           rawIdArr[gIndex] = rawId;
-        //});  // end of stride on grid
-        }
+        });  // end of stride on grid
+        //}
 
       }  // end of Raw to Digi kernel operator()
     };   // end of Raw to Digi struct
