@@ -22,17 +22,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         auto const& fit = tracks.stateAtBS;
         auto const* quality = tracks.qualityData();
 
-        //const Idx blockDimension(alpaka::getWorkDiv<alpaka::Block, alpaka::Elems>(acc)[0]);
-        //const Idx gridDimension(alpaka::getWorkDiv<alpaka::Grid, alpaka::Blocks>(acc)[0]);
-
-        //printf("blockdim:%d gridDim:%d stride:%d\n",blockDimension, gridDimension, TkSoA::stride());
-
         uint32_t i = 0;
         uint32_t j = 0;
         uint32_t x = 0;
 
         for(uint32_t iloop : cms::alpakatools::elements_with_stride(acc, TkSoA::stride())) {
-          //printf("eloop\n");
           j = 0;
           cms::alpakatools::for_each_element_in_grid_strided(acc, TkSoA::stride(), [&](uint32_t iloop2) { 
             if (i == j) x = iloop2; 
