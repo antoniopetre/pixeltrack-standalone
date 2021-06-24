@@ -332,10 +332,10 @@ namespace cms {
         const Idx blockIdxInGrid(alpaka::getIdx<alpaka::Grid, alpaka::Blocks>(acc)[dimIndex]);
 
         const Idx blockDimension(alpaka::getWorkDiv<alpaka::Block, alpaka::Elems>(acc)[dimIndex]);
-        const Idx gridDimension(alpaka::getWorkDiv<alpaka::Grid, alpaka::Elems>(acc)[dimIndex]);
+        const Idx gridDimension(alpaka::getWorkDiv<alpaka::Grid, alpaka::Blocks>(acc)[dimIndex]);
 
         thread_ = blockDimension * blockIdxInGrid + threadIdxLocal;
-        stride_ = blockDimension * gridDimension;
+        stride_ = gridDimension * blockDimension;
         extent_ = stride_;
         blockDim = blockDimension;
       }
@@ -349,12 +349,11 @@ namespace cms {
         const Idx blockIdxInGrid(alpaka::getIdx<alpaka::Grid, alpaka::Blocks>(acc)[dimIndex]);
 
         const Idx blockDimension(alpaka::getWorkDiv<alpaka::Block, alpaka::Elems>(acc)[dimIndex]);
-        const Idx gridDimension(alpaka::getWorkDiv<alpaka::Grid, alpaka::Elems>(acc)[dimIndex]);
-        // elementIdxShift += blockIdxInGrid * blockDimension;
-
+        const Idx gridDimension(alpaka::getWorkDiv<alpaka::Grid, alpaka::Blocks>(acc)[dimIndex]);
+        
         thread_ = blockDimension * blockIdxInGrid + threadIdxLocal;
         thread_ = thread_ + elementIdxShift;  // Add the shift
-        stride_ = blockDimension * gridDimension;
+        stride_ = gridDimension * blockDimension;
         blockDim = blockDimension;
 
         extent_ = extent;

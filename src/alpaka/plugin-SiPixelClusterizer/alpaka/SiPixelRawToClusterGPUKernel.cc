@@ -366,6 +366,21 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                     bool includeErrors,
                                     bool debug) const {
 
+        uint32_t i = 0;
+        uint32_t j = 0;
+        uint32_t x = 0;
+
+        cms::alpakatools::for_each_element_in_grid_strided(acc, wordCounter, [&](uint32_t iloop) {
+          j = 0;
+          for(uint32_t iloop2 : cms::alpakatools::elements_with_stride(acc, wordCounter)) {
+            if (i == j) x = iloop2; 
+            j++;
+          }
+          if (iloop != x)
+            printf("x\n");
+          i++;
+        });
+
         //for(uint32_t iloop : cms::alpakatools::elements_with_stride(acc, wordCounter)) {
         cms::alpakatools::for_each_element_in_grid_strided(acc, wordCounter, [&](uint32_t iloop) {
           auto gIndex = iloop;
