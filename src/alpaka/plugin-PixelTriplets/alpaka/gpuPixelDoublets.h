@@ -74,8 +74,6 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                     CellTracksVector* cellTracks,
                                     CellTracks* cellTracksContainer) const {
         assert(isOuterHitOfCell);
-        //cms::alpakatools::for_each_element_in_grid_strided(
-        //    acc, nHits, [&](uint32_t i) { isOuterHitOfCell[i].reset(); });
         for(uint32_t i : cms::alpakatools::elements_with_stride(acc, nHits)) { isOuterHitOfCell[i].reset(); }
 
         const uint32_t threadIdx(alpaka::getIdx<alpaka::Grid, alpaka::Threads>(acc)[0u]);

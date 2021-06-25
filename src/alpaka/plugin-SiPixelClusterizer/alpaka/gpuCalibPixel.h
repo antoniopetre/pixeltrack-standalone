@@ -45,10 +45,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         }
 
         for(uint32_t i : cms::alpakatools::elements_with_stride(acc, gpuClustering::MaxNumModules)) { nClustersInModule[i] = 0; }
-        //cms::alpakatools::for_each_element_in_grid_strided(
-        //    acc, gpuClustering::MaxNumModules, [&](uint32_t i) { nClustersInModule[i] = 0; });
 
-        //cms::alpakatools::for_each_element_in_grid_strided(acc, numElements, [&](uint32_t i) {
         for(uint32_t i : cms::alpakatools::elements_with_stride(acc, numElements)) {
           if (id[i] != InvId) {
             float conversionFactor = (isRun2) ? (id[i] < 96 ? VCaltoElectronGain_L1 : VCaltoElectronGain) : 1.f;

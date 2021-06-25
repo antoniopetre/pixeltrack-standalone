@@ -25,7 +25,6 @@ namespace gpuClustering {
                                   int32_t* __restrict__ clusterId,
                                   const unsigned int numElements) const {
       for(uint32_t i : cms::alpakatools::elements_with_stride(acc, numElements)) {
-      //cms::alpakatools::for_each_element_in_grid_strided(acc, numElements, [&](uint32_t i) {
         clusterId[i] = i;
         if (InvId != id[i]) {
           int j = i - 1;
@@ -39,7 +38,6 @@ namespace gpuClustering {
             moduleStart[loc + 1] = i;
           }
         }
-      //});
       }
     }
   };
