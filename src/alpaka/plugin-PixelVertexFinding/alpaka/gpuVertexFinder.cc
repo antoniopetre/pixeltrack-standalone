@@ -22,40 +22,24 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
         auto const& fit = tracks.stateAtBS;
         auto const* quality = tracks.qualityData();
 
-        uint32_t i = 0;
-        uint32_t j = 0;
-        uint32_t x = 0;
-
-        for(uint32_t iloop : cms::alpakatools::elements_with_stride(acc, TkSoA::stride())) {
-          j = 0;
-          cms::alpakatools::for_each_element_in_grid_strided(acc, TkSoA::stride(), [&](uint32_t iloop2) { 
-            if (i == j) x = iloop2; 
-            j++;
-          });
-          if (iloop != x)
-            printf("x\n");
-          i++;
-          
-        }
-
-        //for(uint32_t idx : cms::alpakatools::elements_with_stride(acc, TkSoA::stride())) {
-        cms::alpakatools::for_each_element_in_grid_strided(acc, TkSoA::stride(), [&](uint32_t idx) {
+        for(uint32_t idx : cms::alpakatools::elements_with_stride(acc, TkSoA::stride())) {
+        //cms::alpakatools::for_each_element_in_grid_strided(acc, TkSoA::stride(), [&](uint32_t idx) { 
           auto nHits = tracks.nHits(idx);
           if (nHits == 0)
-            return;  // this is a guard: maybe we need to move to nTracks...
+            continue;  // this is a guard: maybe we need to move to nTracks...
 
           // initialize soa...
           soa->idv[idx] = -1;
 
           if (nHits < 4)
-            return;  // no triplets
+            continue;  // no triplets
           if (quality[idx] != trackQuality::loose)
-            return;
+            continue;
 
           auto pt = tracks.pt(idx);
 
           if (pt < ptMin)
-            return;
+            continue;
 
           auto& data = *pws;
           auto it = alpaka::atomicAdd(acc, &data.ntrks, 1u, alpaka::hierarchy::Blocks{});
@@ -63,8 +47,8 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
           data.zt[it] = tracks.zip(idx);
           data.ezt2[it] = fit.covariance(idx)(14);
           data.ptt2[it] = pt * pt;
-        });
-        //}
+        //});
+        }
       }
     };
 
