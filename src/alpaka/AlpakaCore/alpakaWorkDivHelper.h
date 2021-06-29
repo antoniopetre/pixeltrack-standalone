@@ -326,19 +326,6 @@ namespace cms {
     template <typename T, typename T_Acc>
     class elements_with_stride {
     public:
-      ALPAKA_FN_ACC elements_with_stride(const T_Acc& acc) {
-        const unsigned int dimIndex = 0;
-        const Idx threadIdxLocal(alpaka::getIdx<alpaka::Block, alpaka::Threads>(acc)[dimIndex]);
-        const Idx blockIdxInGrid(alpaka::getIdx<alpaka::Grid, alpaka::Blocks>(acc)[dimIndex]);
-
-        const Idx blockDimension(alpaka::getWorkDiv<alpaka::Block, alpaka::Elems>(acc)[dimIndex]);
-        const Idx gridDimension(alpaka::getWorkDiv<alpaka::Grid, alpaka::Blocks>(acc)[dimIndex]);
-
-        thread_ = blockDimension * blockIdxInGrid + threadIdxLocal;
-        stride_ = gridDimension * blockDimension;
-        extent_ = stride_;
-        blockDim = blockDimension;
-      }
 
       ALPAKA_FN_ACC elements_with_stride(const T_Acc& acc,
                                          T extent,
@@ -357,6 +344,12 @@ namespace cms {
         blockDim = blockDimension;
 
         extent_ = extent;
+      }
+
+      ALPAKA_FN_ACC elements_with_stride(const T_Acc& acc) {
+        
+        const Idx gridDimension(alpaka::getWorkDiv<alpaka::Grid, alpaka::Elems>(acc)[0]);
+        elements_with_stride(acc, gridDimension);      
       }
 
       class iterator {
@@ -441,7 +434,7 @@ namespace cms {
         const Vec3 blockIdxInGrid(alpaka::getIdx<alpaka::Grid, alpaka::Blocks>(acc));
 
         const Vec3 blockDimension(alpaka::getWorkDiv<alpaka::Block, alpaka::Elems>(acc));
-        const Vec3 gridDimension(alpaka::getWorkDiv<alpaka::Grid, alpaka::Elems>(acc));
+        const Vec3 gridDimension(alpaka::getWorkDiv<alpaka::Grid, alpaka::Blocks>(acc));
 
         thread_ = {blockDimension[0u] * blockIdxInGrid[0u] + threadIdxLocal[0u],
                    blockDimension[1u] * blockIdxInGrid[1u] + threadIdxLocal[1u],
@@ -458,7 +451,7 @@ namespace cms {
         const Vec3 blockIdxInGrid(alpaka::getIdx<alpaka::Grid, alpaka::Blocks>(acc));
 
         const Vec3 blockDimension(alpaka::getWorkDiv<alpaka::Block, alpaka::Elems>(acc));
-        const Vec3 gridDimension(alpaka::getWorkDiv<alpaka::Grid, alpaka::Elems>(acc));
+        const Vec3 gridDimension(alpaka::getWorkDiv<alpaka::Grid, alpaka::Blocks>(acc));
 
         thread_ = {blockDimension[0u] * blockIdxInGrid[0u] + threadIdxLocal[0u],
                    blockDimension[1u] * blockIdxInGrid[1u] + threadIdxLocal[1u],
@@ -563,7 +556,7 @@ namespace cms {
         const Vec3 blockIdxInGrid(alpaka::getIdx<alpaka::Grid, alpaka::Blocks>(acc));
 
         const Vec3 blockDimension(alpaka::getWorkDiv<alpaka::Block, alpaka::Elems>(acc));
-        const Vec3 gridDimension(alpaka::getWorkDiv<alpaka::Grid, alpaka::Elems>(acc));
+        const Vec3 gridDimension(alpaka::getWorkDiv<alpaka::Grid, alpaka::Blocks>(acc));
 
         thread_ = {blockDimension[0u] * blockIdxInGrid[0u] + threadIdxLocal[0u],
                    blockDimension[1u] * blockIdxInGrid[1u] + threadIdxLocal[1u],
@@ -580,7 +573,7 @@ namespace cms {
         const Vec3 blockIdxInGrid(alpaka::getIdx<alpaka::Grid, alpaka::Blocks>(acc));
 
         const Vec3 blockDimension(alpaka::getWorkDiv<alpaka::Block, alpaka::Elems>(acc));
-        const Vec3 gridDimension(alpaka::getWorkDiv<alpaka::Grid, alpaka::Elems>(acc));
+        const Vec3 gridDimension(alpaka::getWorkDiv<alpaka::Grid, alpaka::Blocks>(acc));
 
         thread_ = {blockDimension[0u] * blockIdxInGrid[0u] + threadIdxLocal[0u],
                    blockDimension[1u] * blockIdxInGrid[1u] + threadIdxLocal[1u],
@@ -694,7 +687,7 @@ namespace cms {
         const Vec3 blockIdxInGrid(alpaka::getIdx<alpaka::Grid, alpaka::Blocks>(acc));
 
         const Vec3 blockDimension(alpaka::getWorkDiv<alpaka::Block, alpaka::Elems>(acc));
-        const Vec3 gridDimension(alpaka::getWorkDiv<alpaka::Grid, alpaka::Elems>(acc));
+        const Vec3 gridDimension(alpaka::getWorkDiv<alpaka::Grid, alpaka::Blocks>(acc));
 
         thread_ = {blockDimension[0u] * blockIdxInGrid[0u] + threadIdxLocal[0u],
                    blockDimension[1u] * blockIdxInGrid[1u] + threadIdxLocal[1u],
@@ -712,7 +705,7 @@ namespace cms {
         const Vec3 blockIdxInGrid(alpaka::getIdx<alpaka::Grid, alpaka::Blocks>(acc));
 
         const Vec3 blockDimension(alpaka::getWorkDiv<alpaka::Block, alpaka::Elems>(acc));
-        const Vec3 gridDimension(alpaka::getWorkDiv<alpaka::Grid, alpaka::Elems>(acc));
+        const Vec3 gridDimension(alpaka::getWorkDiv<alpaka::Grid, alpaka::Blocks>(acc));
 
         thread_ = {blockDimension[0u] * blockIdxInGrid[0u] + threadIdxLocal[0u],
                    blockDimension[1u] * blockIdxInGrid[1u] + threadIdxLocal[1u],
