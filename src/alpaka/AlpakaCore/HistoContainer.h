@@ -41,6 +41,7 @@ namespace cms {
                                     T const *__restrict__ v,
                                     uint32_t const *__restrict__ offsets) const {
         const uint32_t nt = offsets[nh];
+
         cms::alpakatools::for_each_element_in_grid_strided(acc, nt, [&](uint32_t i) {
           auto off = alpaka_std::upper_bound(offsets, offsets + nh + 1, i);
           assert((*off) > 0);
@@ -74,17 +75,15 @@ namespace cms {
       const unsigned int nblocks = (num_items + nthreads - 1) / nthreads;
       const Vec1 blocksPerGrid(nblocks);
 
+      auto d_pc = cms::alpakatools::allocDeviceBuf<int32_t>(1u);
+      int32_t* pc = alpaka::getPtrNative(d_pc);
+      alpaka::memset(queue, d_pc, 0, 1u);
+
       const WorkDiv1 &workDiv = cms::alpakatools::make_workdiv(blocksPerGrid, threadsPerBlockOrElementsPerThread);
       alpaka::enqueue(queue,
                       alpaka::createTaskKernel<ALPAKA_ACCELERATOR_NAMESPACE::Acc1>(
-                          workDiv, multiBlockPrefixScanFirstStep<uint32_t>(), poff, poff, num_items));
-
-      const WorkDiv1 &workDivWith1Block =
-          cms::alpakatools::make_workdiv(Vec1::all(1), threadsPerBlockOrElementsPerThread);
-      alpaka::enqueue(
-          queue,
-          alpaka::createTaskKernel<ALPAKA_ACCELERATOR_NAMESPACE::Acc1>(
-              workDivWith1Block, multiBlockPrefixScanSecondStep<uint32_t>(), poff, poff, num_items, nblocks));
+                          workDiv, multiBlockPrefixScan<uint32_t>(), poff, poff, num_items, pc));
+      alpaka::wait(queue);
     }
 
     template <typename Histo, typename T>
@@ -249,7 +248,7 @@ namespace cms {
           off[nbins()] = uint32_t(off[nbins() - 1]);
           return;
         }
-
+        
         cms::alpakatools::for_each_element_in_grid_strided(acc, totbins(), m, [&](uint32_t i) { off[i] = n; });
       }
 

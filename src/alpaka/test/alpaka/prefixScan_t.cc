@@ -176,23 +176,17 @@ int main() {
         cms::alpakatools::make_workdiv(blocksPerGrid4, threadsPerBlockOrElementsPerThread4);
 
     std::cout << "launch multiBlockPrefixScan " << num_items << ' ' << nBlocks << std::endl;
+    auto d_pc(alpaka::allocBuf<int32_t, Idx>(device, size));
+    int32_t* pc = alpaka::getPtrNative(d_pc);
+
+    alpaka::memset(queue, d_pc, 0, size);
     alpaka::enqueue(queue,
                     alpaka::createTaskKernel<Acc1>(workDivMultiBlock,
-                                                   cms::alpakatools::multiBlockPrefixScanFirstStep<uint32_t>(),
-                                                   input_d,
-                                                   output1_d,
-                                                   num_items));
-
-    const Vec1 blocksPerGridSecondStep(Vec1::all(1));
-    const WorkDiv1& workDivMultiBlockSecondStep =
-        cms::alpakatools::make_workdiv(blocksPerGridSecondStep, threadsPerBlockOrElementsPerThread4);
-    alpaka::enqueue(queue,
-                    alpaka::createTaskKernel<Acc1>(workDivMultiBlockSecondStep,
-                                                   cms::alpakatools::multiBlockPrefixScanSecondStep<uint32_t>(),
+                                                   cms::alpakatools::multiBlockPrefixScan<uint32_t>(),
                                                    input_d,
                                                    output1_d,
                                                    num_items,
-                                                   nBlocks));
+                                                   pc));
 
     alpaka::enqueue(queue, alpaka::createTaskKernel<Acc1>(workDivMultiBlock, verify(), output1_d, num_items));
 
