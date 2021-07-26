@@ -74,17 +74,20 @@ namespace cms {
       const unsigned int nblocks = (num_items + nthreads - 1) / nthreads;
       const Vec1 blocksPerGrid(nblocks);
 
+      //int32_t *pc;
+      int32_t *pc = (int32_t *)((char *)(&(h->psws)));
+
       const WorkDiv1 &workDiv = cms::alpakatools::make_workdiv(blocksPerGrid, threadsPerBlockOrElementsPerThread);
       alpaka::enqueue(queue,
                       alpaka::createTaskKernel<ALPAKA_ACCELERATOR_NAMESPACE::Acc1>(
-                          workDiv, multiBlockPrefixScanFirstStep<uint32_t>(), poff, poff, num_items));
+                          workDiv, multiBlockPrefixScanFirstStep<uint32_t>(), poff, poff, num_items, pc));
 
       const WorkDiv1 &workDivWith1Block =
           cms::alpakatools::make_workdiv(Vec1::all(1), threadsPerBlockOrElementsPerThread);
-      alpaka::enqueue(
-          queue,
-          alpaka::createTaskKernel<ALPAKA_ACCELERATOR_NAMESPACE::Acc1>(
-              workDivWith1Block, multiBlockPrefixScanSecondStep<uint32_t>(), poff, poff, num_items, nblocks));
+      // alpaka::enqueue(
+      //     queue,
+      //     alpaka::createTaskKernel<ALPAKA_ACCELERATOR_NAMESPACE::Acc1>(
+      //         workDivWith1Block, multiBlockPrefixScanSecondStep<uint32_t>(), poff, poff, num_items, nblocks));
     }
 
     template <typename Histo, typename T>
@@ -307,6 +310,7 @@ namespace cms {
 
       Counter off[totbins()];
       index_type bins[capacity()];
+      int32_t psws = 0;
     };
 
     template <typename I,        // type stored in the container (usually an index in a vector of the input values)

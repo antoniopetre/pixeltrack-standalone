@@ -4,6 +4,7 @@
 #include <cstdint>
 #include "CUDACore/CMSUnrollLoop.h"
 #include "AlpakaCore/alpakaConfig.h"
+#include "AlpakaCore/threadfence.h"
 
 #ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
 
@@ -136,20 +137,68 @@ namespace cms {
     template <typename T>
     struct multiBlockPrefixScanFirstStep {
       template <typename T_Acc>
-      ALPAKA_FN_ACC void operator()(const T_Acc& acc, T const* ci, T* co, int32_t size) const {
+      ALPAKA_FN_ACC void operator()(const T_Acc& acc, T const* ci, T* co, int32_t size, int32_t *pc) const {
         uint32_t const blockDimension(alpaka::getWorkDiv<alpaka::Block, alpaka::Threads>(acc)[0u]);
         uint32_t const threadDimension(alpaka::getWorkDiv<alpaka::Thread, alpaka::Elems>(acc)[0u]);
         uint32_t const blockIdx(alpaka::getIdx<alpaka::Grid, alpaka::Blocks>(acc)[0u]);
+        uint32_t const threadIdx(alpaka::getIdx<alpaka::Block, alpaka::Threads>(acc)[0u]);
 
-        auto& ws = alpaka::declareSharedVar<T[32], __COUNTER__>(acc);
+        //auto* const psum(alpaka::getDynSharedMem<T>(acc));
+
+        
         // first each block does a scan of size 1024; (better be enough blocks....)
 #ifndef NDEBUG
         uint32_t const gridDimension(alpaka::getWorkDiv<alpaka::Grid, alpaka::Blocks>(acc)[0u]);
         assert(gridDimension / threadDimension <= 1024);
 #endif
         int off = blockDimension * blockIdx * threadDimension;
+        auto& ws = alpaka::declareSharedVar<T[32], __COUNTER__>(acc);
         if (size - off > 0)
           blockPrefixScan(acc, ci + off, co + off, std::min(int(blockDimension * threadDimension), size - off), ws);
+      
+
+        auto& isLastBlockDone = alpaka::declareSharedVar<bool, __COUNTER__>(acc);
+        if (0 == threadIdx) {
+          cms::alpakatools::threadfence(acc);
+          auto value = alpaka::atomicAdd(acc, pc, 1, alpaka::hierarchy::Grids{});  // block counter
+          isLastBlockDone = (value == (int(gridDimension) - 1));
+        }
+
+        alpaka::syncBlockThreads(acc);
+
+        if (!isLastBlockDone)
+          return;
+
+        assert(int(gridDimension) == *pc);
+        //auto& psum = alpaka::declareSharedVar<T[1024*4], __COUNTER__>(acc);
+
+        auto* const psum(alpaka::getDynSharedMem<T>(acc));
+
+        // first each block does a scan of size 1024; (better be enough blocks....)
+        assert(static_cast<int32_t>(blockDimension * threadDimension) >= gridDimension);
+        for (int elemId = 0; elemId < static_cast<int>(threadDimension); ++elemId) {
+          int index = +threadIdx * threadDimension + elemId;
+
+          if (index < gridDimension) {
+            int lastElementOfPreviousBlockId = index * blockDimension * threadDimension - 1;
+            psum[index] = (lastElementOfPreviousBlockId < size and lastElementOfPreviousBlockId >= 0)
+                              ? co[lastElementOfPreviousBlockId]
+                              : T(0);
+          }
+        }
+
+        alpaka::syncBlockThreads(acc);
+
+        auto& wss = alpaka::declareSharedVar<T[32], __COUNTER__>(acc);
+        blockPrefixScan(acc, psum, psum, gridDimension, wss);
+
+        for (int elemId = 0; elemId < static_cast<int>(threadDimension); ++elemId) {
+          int first = threadIdx * threadDimension + elemId;
+          for (int i = first + blockDimension * threadDimension; i < size; i += blockDimension * threadDimension) {
+            auto k = i / (blockDimension * threadDimension);
+            co[i] += psum[k];
+          }
+        }
       }
     };
 
