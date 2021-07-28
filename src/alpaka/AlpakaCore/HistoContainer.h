@@ -22,14 +22,31 @@ namespace cms {
                                     T const *__restrict__ v,
                                     uint32_t const *__restrict__ offsets) const {
         const uint32_t nt = offsets[nh];
+        uint32_t const blockDimension(alpaka::getWorkDiv<alpaka::Block, alpaka::Threads>(acc)[0u]);
+        uint32_t const threadDimension(alpaka::getWorkDiv<alpaka::Thread, alpaka::Elems>(acc)[0u]);
+
+        uint32_t const threadIdxLocal(alpaka::getIdx<alpaka::Block, alpaka::Threads>(acc)[0u]);
+
+        // Stride = grid size.
+        const Idx gridDimension(alpaka::getWorkDiv<alpaka::Grid, alpaka::Elems>(acc)[0u]);
+        const Idx blockIdxInGrid(alpaka::getIdx<alpaka::Grid, alpaka::Blocks>(acc)[0u]);
+
+        // Strided access.
+        // uint32_t first = threadIdxLocal*threadDimension + blockIdxInGrid*blockDimension;
+
         cms::alpakatools::for_each_element_in_grid_strided(acc, nt, [&](uint32_t i) {
-          auto off = alpaka_std::upper_bound(offsets, offsets + nh + 1, i);
-          assert((*off) > 0);
-          int32_t ih = off - offsets - 1;
-          assert(ih >= 0);
-          assert(ih < int(nh));
-          h->count(acc, v[i], ih);
+        // while (first < nt) {
+        //   for (uint32_t i = first; i < first + threadDimension && i < nt; ++i) {
+            auto off = alpaka_std::upper_bound(offsets, offsets + nh + 1, i);
+            assert((*off) > 0);
+            int32_t ih = off - offsets - 1;
+            assert(ih >= 0);
+            assert(ih < int(nh));
+            h->count(acc, v[i], ih);
         });
+        //   }
+        //   first += gridDimension;
+        // }
       }
     };
 
@@ -41,6 +58,7 @@ namespace cms {
                                     T const *__restrict__ v,
                                     uint32_t const *__restrict__ offsets) const {
         const uint32_t nt = offsets[nh];
+
         cms::alpakatools::for_each_element_in_grid_strided(acc, nt, [&](uint32_t i) {
           auto off = alpaka_std::upper_bound(offsets, offsets + nh + 1, i);
           assert((*off) > 0);
@@ -74,22 +92,15 @@ namespace cms {
       const unsigned int nblocks = (num_items + nthreads - 1) / nthreads;
       const Vec1 blocksPerGrid(nblocks);
 
-#ifdef ALPAKA_ACC_GPU_CUDA_ENABLED    
-
       auto d_pc = cms::alpakatools::allocDeviceBuf<int32_t>(1u);
-
-#else
-      auto d_pc = cms::alpakatools::allocHostBuf<int32_t>(1u);
-
-#endif
       int32_t* pc = alpaka::getPtrNative(d_pc);
-
       alpaka::memset(queue, d_pc, 0, 1u);
 
       const WorkDiv1 &workDiv = cms::alpakatools::make_workdiv(blocksPerGrid, threadsPerBlockOrElementsPerThread);
       alpaka::enqueue(queue,
                       alpaka::createTaskKernel<ALPAKA_ACCELERATOR_NAMESPACE::Acc1>(
                           workDiv, multiBlockPrefixScanFirstStep<uint32_t>(), poff, poff, num_items, pc));
+      alpaka::wait(queue);
     }
 
     template <typename Histo, typename T>
@@ -112,10 +123,12 @@ namespace cms {
           queue,
           alpaka::createTaskKernel<ALPAKA_ACCELERATOR_NAMESPACE::Acc1>(workDiv, countFromVector(), h, nh, v, offsets));
       launchFinalize(h, queue);
+      //alpaka::wait(queue);
 
       alpaka::enqueue(
           queue,
           alpaka::createTaskKernel<ALPAKA_ACCELERATOR_NAMESPACE::Acc1>(workDiv, fillFromVector(), h, nh, v, offsets));
+      //alpaka::wait(queue);
     }
 
     struct finalizeBulk {
@@ -254,7 +267,7 @@ namespace cms {
           off[nbins()] = uint32_t(off[nbins() - 1]);
           return;
         }
-
+        
         cms::alpakatools::for_each_element_in_grid_strided(acc, totbins(), m, [&](uint32_t i) { off[i] = n; });
       }
 
