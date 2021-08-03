@@ -182,11 +182,10 @@ int main() {
     alpaka::memset(queue, d_pc, 0, size);
     alpaka::enqueue(queue,
                     alpaka::createTaskKernel<Acc1>(workDivMultiBlock,
-                                                   cms::alpakatools::multiBlockPrefixScan<uint32_t>(),
+                                                   cms::alpakatools::multiBlockPrefixScanFirstStep<uint32_t>(),
                                                    input_d,
                                                    output1_d,
-                                                   num_items,
-                                                   pc));
+                                                   num_items));
 
     alpaka::enqueue(queue, alpaka::createTaskKernel<Acc1>(workDivMultiBlock, verify(), output1_d, num_items));
 

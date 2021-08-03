@@ -24,10 +24,10 @@ namespace cms {
         const uint32_t nt = offsets[nh];
         cms::alpakatools::for_each_element_in_grid_strided(acc, nt, [&](uint32_t i) {
           auto off = alpaka_std::upper_bound(offsets, offsets + nh + 1, i);
-          ALPAKA_ASSERT_OFFLOAD((*off) > 0);
+          assert((*off) > 0);
           int32_t ih = off - offsets - 1;
-          ALPAKA_ASSERT_OFFLOAD(ih >= 0);
-          ALPAKA_ASSERT_OFFLOAD(ih < int(nh));
+          assert(ih >= 0);
+          assert(ih < int(nh));
           h->count(acc, v[i], ih);
         });
       }
@@ -41,13 +41,12 @@ namespace cms {
                                     T const *__restrict__ v,
                                     uint32_t const *__restrict__ offsets) const {
         const uint32_t nt = offsets[nh];
-
         cms::alpakatools::for_each_element_in_grid_strided(acc, nt, [&](uint32_t i) {
           auto off = alpaka_std::upper_bound(offsets, offsets + nh + 1, i);
-          ALPAKA_ASSERT_OFFLOAD((*off) > 0);
+          assert((*off) > 0);
           int32_t ih = off - offsets - 1;
-          ALPAKA_ASSERT_OFFLOAD(ih >= 0);
-          ALPAKA_ASSERT_OFFLOAD(ih < int(nh));
+          assert(ih >= 0);
+          assert(ih < int(nh));
           h->fill(acc, v[i], i, ih);
         });
       }
@@ -75,15 +74,17 @@ namespace cms {
       const unsigned int nblocks = (num_items + nthreads - 1) / nthreads;
       const Vec1 blocksPerGrid(nblocks);
 
-      auto d_pc = cms::alpakatools::allocDeviceBuf<int32_t>(1u);
-      int32_t* pc = alpaka::getPtrNative(d_pc);
-      alpaka::memset(queue, d_pc, 0, 1u);
-
       const WorkDiv1 &workDiv = cms::alpakatools::make_workdiv(blocksPerGrid, threadsPerBlockOrElementsPerThread);
       alpaka::enqueue(queue,
                       alpaka::createTaskKernel<ALPAKA_ACCELERATOR_NAMESPACE::Acc1>(
-                          workDiv, multiBlockPrefixScan<uint32_t>(), poff, poff, num_items, pc));
-      alpaka::wait(queue);
+                          workDiv, multiBlockPrefixScanFirstStep<uint32_t>(), poff, poff, num_items));
+
+      const WorkDiv1 &workDivWith1Block =
+          cms::alpakatools::make_workdiv(Vec1::all(1), threadsPerBlockOrElementsPerThread);
+      alpaka::enqueue(
+          queue,
+          alpaka::createTaskKernel<ALPAKA_ACCELERATOR_NAMESPACE::Acc1>(
+              workDivWith1Block, multiBlockPrefixScanSecondStep<uint32_t>(), poff, poff, num_items, nblocks));
     }
 
     template <typename Histo, typename T>
@@ -125,7 +126,7 @@ namespace cms {
       int bs = Hist::bin(value);
       int be = std::min(int(Hist::nbins() - 1), bs + n);
       bs = std::max(0, bs - n);
-      ALPAKA_ASSERT_OFFLOAD(be >= bs);
+      assert(be >= bs);
       for (auto pj = hist.begin(bs); pj < hist.end(be); ++pj) {
         func(*pj);
       }
@@ -136,7 +137,7 @@ namespace cms {
     ALPAKA_FN_HOST_ACC ALPAKA_FN_INLINE void forEachInWindow(Hist const &hist, V wmin, V wmax, Func const &func) {
       auto bs = Hist::bin(wmin);
       auto be = Hist::bin(wmax);
-      ALPAKA_ASSERT_OFFLOAD(be >= bs);
+      assert(be >= bs);
       for (auto pj = hist.begin(bs); pj < hist.end(be); ++pj) {
         func(*pj);
       }
@@ -210,15 +211,15 @@ namespace cms {
 
       template <typename T_Acc>
       ALPAKA_FN_ACC ALPAKA_FN_INLINE void countDirect(const T_Acc &acc, T b) {
-        ALPAKA_ASSERT_OFFLOAD(b < nbins());
+        assert(b < nbins());
         atomicIncrement(acc, off[b]);
       }
 
       template <typename T_Acc>
       ALPAKA_FN_ACC ALPAKA_FN_INLINE void fillDirect(const T_Acc &acc, T b, index_type j) {
-        ALPAKA_ASSERT_OFFLOAD(b < nbins());
+        assert(b < nbins());
         auto w = atomicDecrement(acc, off[b]);
-        ALPAKA_ASSERT_OFFLOAD(w > 0);
+        assert(w > 0);
         bins[w - 1] = j;
       }
 
@@ -248,51 +249,51 @@ namespace cms {
           off[nbins()] = uint32_t(off[nbins() - 1]);
           return;
         }
-        
+
         cms::alpakatools::for_each_element_in_grid_strided(acc, totbins(), m, [&](uint32_t i) { off[i] = n; });
       }
 
       template <typename T_Acc>
       ALPAKA_FN_ACC ALPAKA_FN_INLINE void count(const T_Acc &acc, T t) {
         uint32_t b = bin(t);
-        ALPAKA_ASSERT_OFFLOAD(b < nbins());
+        assert(b < nbins());
         atomicIncrement(acc, off[b]);
       }
 
       template <typename T_Acc>
       ALPAKA_FN_ACC ALPAKA_FN_INLINE void fill(const T_Acc &acc, T t, index_type j) {
         uint32_t b = bin(t);
-       ALPAKA_ASSERT_OFFLOAD(b < nbins());
+        assert(b < nbins());
         auto w = atomicDecrement(acc, off[b]);
-        ALPAKA_ASSERT_OFFLOAD(w > 0);
+        assert(w > 0);
         bins[w - 1] = j;
       }
 
       template <typename T_Acc>
       ALPAKA_FN_ACC ALPAKA_FN_INLINE void count(const T_Acc &acc, T t, uint32_t nh) {
         uint32_t b = bin(t);
-        ALPAKA_ASSERT_OFFLOAD(b < nbins());
+        assert(b < nbins());
         b += histOff(nh);
-        ALPAKA_ASSERT_OFFLOAD(b < totbins());
+        assert(b < totbins());
         atomicIncrement(acc, off[b]);
       }
 
       template <typename T_Acc>
       ALPAKA_FN_ACC ALPAKA_FN_INLINE void fill(const T_Acc &acc, T t, index_type j, uint32_t nh) {
         uint32_t b = bin(t);
-        ALPAKA_ASSERT_OFFLOAD(b < nbins());
+        assert(b < nbins());
         b += histOff(nh);
-        ALPAKA_ASSERT_OFFLOAD(b < totbins());
+        assert(b < totbins());
         auto w = atomicDecrement(acc, off[b]);
-        ALPAKA_ASSERT_OFFLOAD(w > 0);
+        assert(w > 0);
         bins[w - 1] = j;
       }
 
       template <typename T_Acc>
       ALPAKA_FN_ACC ALPAKA_FN_INLINE void finalize(const T_Acc &acc, Counter *ws = nullptr) {
-        ALPAKA_ASSERT_OFFLOAD(off[totbins() - 1] == 0);
+        assert(off[totbins() - 1] == 0);
         blockPrefixScan(acc, off, totbins(), ws);
-        ALPAKA_ASSERT_OFFLOAD(off[totbins() - 1] == off[totbins() - 2]);
+        assert(off[totbins() - 1] == off[totbins() - 2]);
       }
 
       constexpr auto size() const { return uint32_t(off[totbins() - 1]); }
