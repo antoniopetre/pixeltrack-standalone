@@ -228,7 +228,14 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                     pIndex, firstElementIdxX, endElementIdxX, blockDimensionX, maxpIndex))
               break;
 
-            auto oi = p[pIndex];  // auto oi = __ldg(p); is not allowed since __ldg is device-only
+            #ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
+              auto oi = __ldg(p + pIndex);  // auto oi = __ldg(p); is not allowed since __ldg is device-only
+
+            #else
+              auto oi = p[pIndex];  // auto oi = __ldg(p); is not allowed since __ldg is device-only
+
+            #endif
+
             ALPAKA_ASSERT_OFFLOAD(oi >= offsets[outer]);
             ALPAKA_ASSERT_OFFLOAD(oi < offsets[outer + 1]);
             auto mo = hh.detectorIndex(oi);

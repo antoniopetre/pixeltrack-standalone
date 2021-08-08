@@ -269,7 +269,14 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                 numberOfPossibleNeighbors,
                 0u,
                 [&](uint32_t j) {
-                  auto otherCell = vi[j];  // NB: Was with __ldg in legacy
+                  // auto otherCell = vi[j];  // NB: Was with __ldg in legacy
+                   #ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
+                    auto otherCell = __ldg(vi +j);  // auto oi = __ldg(p); is not allowed since __ldg is device-only
+
+                  #else
+                    auto otherCell = vi[j];  // auto oi = __ldg(p); is not allowed since __ldg is device-only
+
+                  #endif
                   auto &oc = cells[otherCell];
                   // if (cells[otherCell].theDoubletId < 0 ||
                   //    cells[otherCell].theUsed>1 )

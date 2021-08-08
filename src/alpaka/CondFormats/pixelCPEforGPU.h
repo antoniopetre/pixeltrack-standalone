@@ -11,7 +11,7 @@
 #include "Geometry/phase1PixelTopology.h"
 
 #include "AlpakaCore/alpakaCommon.h"
-//#include "CUDACore/cuda_cxx17.h"  // TO DO: include this??
+#include "../cuda/CUDACore/cuda_cxx17.h"  // TO DO: include this??
 
 namespace pixelCPEforGPU {
 
@@ -74,6 +74,11 @@ namespace pixelCPEforGPU {
 
     ALPAKA_FN_ACC uint8_t layer(uint16_t id)
         const {  // TO DO: removed __ldg from legacy, check impact on perf. If [] does not work, can also try return *(m_layerGeometry->layer + id / phase1PixelTopology::maxModuleStride);
+      //return m_layerGeometry->layer[id / phase1PixelTopology::maxModuleStride];
+      #ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
+        return __ldg(m_layerGeometry->layer + id / phase1PixelTopology::maxModuleStride);
+      #endif
+
       return m_layerGeometry->layer[id / phase1PixelTopology::maxModuleStride];
     };
   };

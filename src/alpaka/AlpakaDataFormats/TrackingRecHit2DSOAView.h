@@ -27,40 +27,110 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     ALPAKA_FN_ACC ALPAKA_FN_INLINE float& xLocal(int i) { return m_xl[i]; }
     ALPAKA_FN_ACC ALPAKA_FN_INLINE float xLocal(int i) const {
+      #if ALPAKA_ACC_GPU_CUDA_ENABLED
+      return __ldg(m_xl + i);
+      #endif
       return m_xl[i];
     }  // TO DO: removed __ldg from legacy, check impact on perf.
-    ALPAKA_FN_ACC ALPAKA_FN_INLINE float& yLocal(int i) { return m_yl[i]; }
-    ALPAKA_FN_ACC ALPAKA_FN_INLINE float yLocal(int i) const { return m_yl[i]; }
+    ALPAKA_FN_ACC ALPAKA_FN_INLINE float& yLocal(int i) { 
+      return m_yl[i];
+      }
+    ALPAKA_FN_ACC ALPAKA_FN_INLINE float yLocal(int i) const {
+      #if ALPAKA_ACC_GPU_CUDA_ENABLED
+      return __ldg(m_yl + i);
+      #endif
+      return m_yl[i];
+    }
 
     ALPAKA_FN_ACC ALPAKA_FN_INLINE float& xerrLocal(int i) { return m_xerr[i]; }
-    ALPAKA_FN_ACC ALPAKA_FN_INLINE float xerrLocal(int i) const { return m_xerr[i]; }
+    ALPAKA_FN_ACC ALPAKA_FN_INLINE float xerrLocal(int i) const {
+      #if ALPAKA_ACC_GPU_CUDA_ENABLED
+      return __ldg(m_xerr + i);
+      #endif
+      return m_xerr[i];
+    }
     ALPAKA_FN_ACC ALPAKA_FN_INLINE float& yerrLocal(int i) { return m_yerr[i]; }
-    ALPAKA_FN_ACC ALPAKA_FN_INLINE float yerrLocal(int i) const { return m_yerr[i]; }
+    ALPAKA_FN_ACC ALPAKA_FN_INLINE float yerrLocal(int i) const {
+      #if ALPAKA_ACC_GPU_CUDA_ENABLED
+      return __ldg(m_yerr + i);
+      #endif
+      return m_yerr[i];
+    }
 
     ALPAKA_FN_ACC ALPAKA_FN_INLINE float& xGlobal(int i) { return m_xg[i]; }
-    ALPAKA_FN_ACC ALPAKA_FN_INLINE float xGlobal(int i) const { return m_xg[i]; }
+    ALPAKA_FN_ACC ALPAKA_FN_INLINE float xGlobal(int i) const {
+      #if ALPAKA_ACC_GPU_CUDA_ENABLED
+      return __ldg(m_xg + i);
+      #endif
+      return m_xg[i];
+    }
     ALPAKA_FN_ACC ALPAKA_FN_INLINE float& yGlobal(int i) { return m_yg[i]; }
-    ALPAKA_FN_ACC ALPAKA_FN_INLINE float yGlobal(int i) const { return m_yg[i]; }
+    ALPAKA_FN_ACC ALPAKA_FN_INLINE float yGlobal(int i) const {
+      #if ALPAKA_ACC_GPU_CUDA_ENABLED
+      return __ldg(m_yg + i);
+      #endif
+      return m_yg[i];
+    }
     ALPAKA_FN_ACC ALPAKA_FN_INLINE float& zGlobal(int i) { return m_zg[i]; }
-    ALPAKA_FN_ACC ALPAKA_FN_INLINE float zGlobal(int i) const { return m_zg[i]; }
+    ALPAKA_FN_ACC ALPAKA_FN_INLINE float zGlobal(int i) const {
+      #if ALPAKA_ACC_GPU_CUDA_ENABLED
+      return __ldg(m_zg + i);
+      #endif
+      return m_zg[i];
+    }
     ALPAKA_FN_ACC ALPAKA_FN_INLINE float& rGlobal(int i) { return m_rg[i]; }
-    ALPAKA_FN_ACC ALPAKA_FN_INLINE float rGlobal(int i) const { return m_rg[i]; }
+    ALPAKA_FN_ACC ALPAKA_FN_INLINE float rGlobal(int i) const {
+      #if ALPAKA_ACC_GPU_CUDA_ENABLED
+      return __ldg(m_rg + i);
+      #endif
+      return m_rg[i];
+    }
 
     ALPAKA_FN_ACC ALPAKA_FN_INLINE int16_t& iphi(int i) { return m_iphi[i]; }
-    ALPAKA_FN_ACC ALPAKA_FN_INLINE int16_t iphi(int i) const { return m_iphi[i]; }
+    ALPAKA_FN_ACC ALPAKA_FN_INLINE int16_t iphi(int i) const {
+      #if ALPAKA_ACC_GPU_CUDA_ENABLED
+      return __ldg(m_iphi + i);
+      #endif
+      return m_iphi[i];
+    }
 
     ALPAKA_FN_ACC ALPAKA_FN_INLINE int32_t& charge(int i) { return m_charge[i]; }
-    ALPAKA_FN_ACC ALPAKA_FN_INLINE int32_t charge(int i) const { return m_charge[i]; }
+    ALPAKA_FN_ACC ALPAKA_FN_INLINE int32_t charge(int i) const {
+      #if ALPAKA_ACC_GPU_CUDA_ENABLED
+      return __ldg(m_charge + i);
+      #endif
+      return m_charge[i];
+    }
     ALPAKA_FN_ACC ALPAKA_FN_INLINE int16_t& clusterSizeX(int i) { return m_xsize[i]; }
-    ALPAKA_FN_ACC ALPAKA_FN_INLINE int16_t clusterSizeX(int i) const { return m_xsize[i]; }
+    ALPAKA_FN_ACC ALPAKA_FN_INLINE int16_t clusterSizeX(int i) const {
+      #if ALPAKA_ACC_GPU_CUDA_ENABLED
+      return __ldg(m_xsize + i);
+      #endif
+      return m_xsize[i];
+    }
     ALPAKA_FN_ACC ALPAKA_FN_INLINE int16_t& clusterSizeY(int i) { return m_ysize[i]; }
-    ALPAKA_FN_ACC ALPAKA_FN_INLINE int16_t clusterSizeY(int i) const { return m_ysize[i]; }
+    ALPAKA_FN_ACC ALPAKA_FN_INLINE int16_t clusterSizeY(int i) const {
+      #if ALPAKA_ACC_GPU_CUDA_ENABLED
+      return __ldg(m_ysize + i);
+      #endif
+      return m_ysize[i];
+    }
     ALPAKA_FN_ACC ALPAKA_FN_INLINE uint16_t& detectorIndex(int i) { return m_detInd[i]; }
-    ALPAKA_FN_ACC ALPAKA_FN_INLINE uint16_t detectorIndex(int i) const { return m_detInd[i]; }
+    ALPAKA_FN_ACC ALPAKA_FN_INLINE uint16_t detectorIndex(int i) const {
+      #if ALPAKA_ACC_GPU_CUDA_ENABLED
+      return __ldg(m_detInd + i);
+      #endif
+      return m_detInd[i];
+    }
 
     ALPAKA_FN_ACC ALPAKA_FN_INLINE pixelCPEforGPU::ParamsOnGPU const& cpeParams() const { return *m_cpeParams; }
 
-    ALPAKA_FN_ACC ALPAKA_FN_INLINE uint32_t hitsModuleStart(int i) const { return m_hitsModuleStart[i]; }
+    ALPAKA_FN_ACC ALPAKA_FN_INLINE uint32_t hitsModuleStart(int i) const {
+      #if ALPAKA_ACC_GPU_CUDA_ENABLED
+      return __ldg(m_hitsModuleStart + i);
+      #endif
+      return m_hitsModuleStart[i];
+    }
 
     ALPAKA_FN_ACC ALPAKA_FN_INLINE uint32_t* hitsLayerStart() { return m_hitsLayerStart; }
     ALPAKA_FN_ACC ALPAKA_FN_INLINE uint32_t const* hitsLayerStart() const { return m_hitsLayerStart; }

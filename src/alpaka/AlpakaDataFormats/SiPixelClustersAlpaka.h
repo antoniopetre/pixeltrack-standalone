@@ -42,10 +42,37 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     class DeviceConstView {
     public:
       // TO DO: removed __ldg, check impact on perf with src/cuda.
-      ALPAKA_FN_ACC ALPAKA_FN_INLINE uint32_t moduleStart(int i) const { return moduleStart_[i]; }
-      ALPAKA_FN_ACC ALPAKA_FN_INLINE uint32_t clusInModule(int i) const { return clusInModule_[i]; }
-      ALPAKA_FN_ACC ALPAKA_FN_INLINE uint32_t moduleId(int i) const { return moduleId_[i]; }
-      ALPAKA_FN_ACC ALPAKA_FN_INLINE uint32_t clusModuleStart(int i) const { return clusModuleStart_[i]; }
+      ALPAKA_FN_ACC ALPAKA_FN_INLINE uint32_t moduleStart(int i) const {
+        #ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
+          return __ldg(moduleStart_ + i);
+        #endif
+        return moduleStart_[i];
+      }
+      
+      
+      ALPAKA_FN_ACC ALPAKA_FN_INLINE uint32_t clusInModule(int i) const { 
+        #ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
+          return __ldg(clusInModule_ + i);
+        #endif
+        return clusInModule_[i];
+        
+      }
+      
+      
+      ALPAKA_FN_ACC ALPAKA_FN_INLINE uint32_t moduleId(int i) const { 
+        #ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
+          return __ldg(moduleId_ + i);
+        #endif
+        return moduleId_[i];
+      }
+      
+      
+      ALPAKA_FN_ACC ALPAKA_FN_INLINE uint32_t clusModuleStart(int i) const { 
+        #ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
+          return __ldg(clusModuleStart_ + i);
+        #endif
+        return clusModuleStart_[i];
+      }
 
       friend SiPixelClustersAlpaka;
 
