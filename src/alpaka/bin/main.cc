@@ -110,6 +110,16 @@ int main(int argc, char** argv) {
         default_num_threads();  // By default, this number of threads is chosen in Alpaka for the TBB pool.
   }
 
+#if CUDA_VERSION >= 11020 and ALPAKA_ACC_GPU_CUDA_ENABLED
+  // Initialize the CUDA memory pool
+  uint64_t threshold = cms::alpakatools::allocator::minCachedBytes();
+  for (int device = 0; device < 1; ++device) {
+    cudaMemPool_t pool;
+    cudaDeviceGetDefaultMemPool(&pool, device);
+    cudaMemPoolSetAttribute(pool, cudaMemPoolAttrReleaseThreshold, &threshold);
+  }
+#endif
+
   // NB: The choice & tuning of device at runtime needs to be handled properly
   // inside a ALPAKA_ACCELERATOR_NAMESPACE.
   // For now, the choice is made at run time

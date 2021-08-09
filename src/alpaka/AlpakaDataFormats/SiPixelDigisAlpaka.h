@@ -58,6 +58,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     // TO DO: nothing async in here for now... Pass the queue as argument instead, and don't wait anymore!
     auto adcToHostAsync(Queue &queue) const {
       auto ret = cms::alpakatools::allocHostBuf<uint16_t>(nDigis());
+      alpaka::prepareForAsyncCopy(ret);
       alpaka::memcpy(queue, ret, adc_d, nDigis());
       return ret;
     }
