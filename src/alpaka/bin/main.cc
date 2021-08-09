@@ -11,6 +11,7 @@
 #include <tbb/task_scheduler_init.h>
 
 #include "EventProcessor.h"
+#include <cuda_runtime.h>
 
 namespace {
   void print_help(std::string const& name) {
@@ -109,6 +110,24 @@ int main(int argc, char** argv) {
     numberOfThreads = tbb::task_scheduler_init::
         default_num_threads();  // By default, this number of threads is chosen in Alpaka for the TBB pool.
   }
+
+  int numberOfDevices;
+  auto status = cudaGetDeviceCount(&numberOfDevices);
+  if (cudaSuccess != status) {
+    std::cout << "Failed to initialize the CUDA runtime";
+    return EXIT_FAILURE;
+  }
+  std::cout << "Found " << numberOfDevices << " devices" << std::endl;
+
+  #if CUDA_VERSION >= 11020
+  // Initialize the CUDA memory pool
+  uint64_t threshold = cms::alpakatools::allocator::minCachedBytes();
+  for (int device = 0; device < numberOfDevices; ++device) {
+    cudaMemPool_t pool;
+    cudaDeviceGetDefaultMemPool(&pool, device);
+    cudaMemPoolSetAttribute(pool, cudaMemPoolAttrReleaseThreshold, &threshold);
+  }
+#endif
 
   // NB: The choice & tuning of device at runtime needs to be handled properly
   // inside a ALPAKA_ACCELERATOR_NAMESPACE.

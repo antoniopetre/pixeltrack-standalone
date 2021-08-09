@@ -4,6 +4,8 @@
 #include "CondFormats/SiPixelFedCablingMapGPU.h"
 
 #include "AlpakaCore/alpakaCommon.h"
+#include "AlpakaCore/ESProduct.h"
+#include <cuda_runtime.h>
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
@@ -19,10 +21,38 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     const SiPixelFedCablingMapGPU* cablingMap() const { return alpaka::getPtrNative(cablingMapDevice_); }
 
+    // returns pointer to GPU memory
+    const SiPixelFedCablingMapGPU *getGPUProductAsync(cudaStream_t cudaStream) const;
+
+    // returns pointer to GPU memory
+    const unsigned char *getModToUnpAllAsync(cudaStream_t cudaStream) const;
+
   private:
     CablingMapDeviceBuf cablingMapDevice_;
     bool hasQuality_;
-  };
+
+    //std::vector<unsigned char, cms::cuda::HostAllocator<unsigned char>> modToUnpDefault;
+    //AlpakaHostBuf<unsigned char> modToUnpDefault;
+
+    /*
+    struct GPUData {
+      CablingMapDeviceBuf cablingMapDevice;
+       ~GPUData() {
+
+       }
+    };
+    cms::alpakatools::ESProduct<GPUData> gpuData_;
+
+    struct ModulesToUnpack {
+      
+      unsigned char *modToUnpDefault = nullptr;  // pointer to GPU
+      ~ModulesToUnpack() {
+
+      }
+    };
+    cms::alpakatools::ESProduct<ModulesToUnpack> modToUnp_;
+    */
+    };
 
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
 
