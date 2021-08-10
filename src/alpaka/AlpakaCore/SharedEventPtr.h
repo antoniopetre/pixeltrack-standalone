@@ -13,7 +13,7 @@ namespace cms {
     // to avoid extra layer of indirection
 #ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
     using Queue = alpaka::QueueCudaRtNonBlocking;
-#elseif ALPAKA_ACC_CPU_B_TBB_T_SEQ_ENABLED
+#elif defined ALPAKA_ACC_CPU_B_TBB_T_SEQ_ENABLED
     using Queue = alpaka::QueueCpuNonBlocking;
 #else 
   using Queue = alpaka::QueueCpuBlocking;

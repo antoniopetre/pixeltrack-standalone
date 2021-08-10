@@ -9,6 +9,6 @@ namespace cms::alpakatools {
     // (and even then there is no load balancing).
     
     // TODO: improve the "assignment" logic
-    return id % deviceCount();
+    return id % cms::alpakatools::deviceCount();
   } 
 }  // namespace cms::alpakatools

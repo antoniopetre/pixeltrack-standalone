@@ -9,9 +9,11 @@ using namespace alpaka_common;
 namespace cms {
   namespace alpakatools {
 
-    template <typename Queue, typename T_Acc>
-    ALPAKA_FN_ACC ALPAKA_FN_INLINE auto createEvent(T_Acc const& acc) {
-      return alpaka::Event<Queue>(acc);
+    template <typename T_Acc>
+    ALPAKA_FN_ACC ALPAKA_FN_INLINE auto createQueueNonBlocking(T_Acc const& acc) {
+      using AccQueueProperty = alpaka::NonBlocking;
+      alpaka::Queue<T_Acc, AccQueueProperty> x(acc);
+      return x;
     }
 
   }  // namespace alpakatools

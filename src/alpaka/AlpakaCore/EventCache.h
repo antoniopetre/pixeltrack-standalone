@@ -8,7 +8,7 @@
 #include "Framework/ReusableObjectHolder.h"
 #include "AlpakaCore/SharedEventPtr.h"
 #include "AlpakaCore/alpakaConfigCommon.h"
-// #include "alpakaMemoryHelper.h"
+#include "AlpakaCore/deviceCount.h"
 
 class CUDAService;
 
