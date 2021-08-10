@@ -3,6 +3,7 @@
 #include "AlpakaCore/deviceCount.h"
 #include "AlpakaCore/eventWorkHasCompleted.h"
 #include "AlpakaCore/ScopedSetDevice.h"
+#include "alpakaEventHelper.h"
 
 namespace cms::alpakatools {
   void EventCache::Deleter::operator()(alpaka::Event<Queue> *event) const {
@@ -19,9 +20,10 @@ namespace cms::alpakatools {
   // getEventCache() only if we have CUDA devices present
   EventCache::EventCache() : cache_(deviceCount()) {}
 
-  SharedEventPtr EventCache::get() {
+  template <typename T_Acc>
+  SharedEventPtr EventCache::get(T_Acc acc) {
     const auto dev = currentDevice();
-    auto event = makeOrGet(dev);
+    auto event = makeOrGet(dev, acc);
     // captured work has completed, or a just-created event
     if (eventWorkHasCompleted(*(event.get()))) {
       return event;
@@ -34,7 +36,7 @@ namespace cms::alpakatools {
     std::vector<SharedEventPtr> ptrs{std::move(event)};
     bool completed;
     do {
-      event = makeOrGet(dev);
+      event = makeOrGet(dev, acc);
       completed = eventWorkHasCompleted(*(event.get()));
       if (not completed) {
         ptrs.emplace_back(std::move(event));
@@ -44,14 +46,16 @@ namespace cms::alpakatools {
   }
 
 
-  SharedEventPtr EventCache::makeOrGet(int dev) {
-    return cache_[dev].makeOrGet([dev]() {
-    //   alpaka::Event<Queue> event;
+  template <typename T_Acc>
+  SharedEventPtr EventCache::makeOrGet(int dev, T_Acc acc) {
+    return cache_[dev].makeOrGet([dev, acc]() {
+      // alpaka::Event<Queue> event(dev);
+      auto event = cms::alpakatools::createEvent<Queue>(acc);
       // it should be a bit faster to ignore timings
 #ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
-      cudaEventCreateWithFlags(event.get(), cudaEventDisableTiming);
+      cudaEventCreateWithFlags(event, cudaEventDisableTiming);
 #endif
-      return std::unique_ptr<BareEvent, Deleter>(event.get(), Deleter{dev});
+      return std::unique_ptr<BareEvent, Deleter>(event, Deleter{dev});
 // TODO ANTONIO
     });
   }

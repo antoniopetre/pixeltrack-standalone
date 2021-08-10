@@ -9,11 +9,11 @@ namespace cms {
     int deviceCount() {
       int ndevices;
 #ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
-      cudaGetDeviceCount(&ndevices);
-    //   ndevices = alpaka::getDevCount<alpaka::Pltf<DevAcc1>>();
-#endif
-      // TODO ANTONIOå
-      
+      // cudaGetDeviceCount(&ndevices);
+      ndevices = alpaka::getDevCount<ALPAKA_ACCELERATOR_NAMESPACE::PltfAcc1>();
+#else
+      ndevices = 1;
+#endif      
       return ndevices;
     }
   }  // namespace alpakatools

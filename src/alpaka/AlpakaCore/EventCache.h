@@ -8,6 +8,7 @@
 #include "Framework/ReusableObjectHolder.h"
 #include "AlpakaCore/SharedEventPtr.h"
 #include "AlpakaCore/alpakaConfigCommon.h"
+// #include "alpakaMemoryHelper.h"
 
 class CUDAService;
 
@@ -26,13 +27,15 @@ namespace cms {
       // captured work has completed, i.e. cudaEventQuery() == cudaSuccess.
       //
       // This function is thread safe
-      SharedEventPtr get();
+      template <typename T_Acc>
+      SharedEventPtr get(T_Acc acc);
 
     private:
       friend class ::CUDAService;
 
       // thread safe
-      SharedEventPtr makeOrGet(int dev);
+      template <typename T_Acc>
+      SharedEventPtr makeOrGet(int dev, T_Acc acc);
 
       // not thread safe, intended to be called only from CUDAService destructor
       void clear();
