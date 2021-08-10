@@ -9,7 +9,9 @@ namespace cms {
   namespace alpakatools {
     inline int currentDevice() {
       int dev;
-      cudaCheck(cudaGetDevice(&dev));
+#ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
+      cudaGetDevice(&dev);
+#endif
       return dev;
     }
   }  // namespace alpakatools

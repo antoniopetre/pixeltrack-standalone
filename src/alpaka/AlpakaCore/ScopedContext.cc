@@ -38,12 +38,12 @@ namespace {
 namespace cms::alpakatools {
   namespace impl {
     ScopedContextBase::ScopedContextBase(edm::StreamID streamID) : currentDevice_(chooseDevice(streamID)) {
-      cudaCheck(cudaSetDevice(currentDevice_));
+      cudaSetDevice(currentDevice_);
       stream_ = getStreamCache().get();
     }
 
     ScopedContextBase::ScopedContextBase(const ProductBase& data) : currentDevice_(data.device()) {
-      cudaCheck(cudaSetDevice(currentDevice_));
+      cudaSetDevice(currentDevice_);
       if (data.mayReuseStream()) {
         stream_ = data.streamPtr();
       } else {
@@ -53,7 +53,7 @@ namespace cms::alpakatools {
 
     ScopedContextBase::ScopedContextBase(int device, SharedStreamPtr stream)
         : currentDevice_(device), stream_(std::move(stream)) {
-      cudaCheck(cudaSetDevice(currentDevice_));
+      cudaSetDevice(currentDevice_);
     }
 
     ////////////////////
@@ -76,14 +76,13 @@ namespace cms::alpakatools {
           // wait for an event, so all subsequent work in the stream
           // will run only after the event has "occurred" (i.e. data
           // product became available).
-          cudaCheck(cudaStreamWaitEvent(stream(), dataEvent, 0), "Failed to make a stream to wait for an event");
+          cudaStreamWaitEvent(stream(), dataEvent, 0);
         }
       }
     }
 
     void ScopedContextHolderHelper::enqueueCallback(int device, cudaStream_t stream) {
-      cudaCheck(
-          cudaStreamAddCallback(stream, cudaScopedContextCallback, new CallbackData{waitingTaskHolder_, device}, 0));
+      cudaStreamAddCallback(stream, cudaScopedContextCallback, new CallbackData{waitingTaskHolder_, device}, 0);
     }
   }  // namespace impl
 

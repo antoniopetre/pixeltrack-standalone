@@ -60,8 +60,7 @@ namespace cms {
               // wait on the CUDA stream and return the value. Subsequent
               // work queued on the stream will wait for the event to
               // occur (i.e. transfer to finish).
-              cudaCheck(cudaStreamWaitEvent(cudaStream, data.m_event.get(), 0),
-                        "Failed to make a stream to wait for an event");
+              cudaStreamWaitEvent(cudaStream, data.m_event.get(), 0);
             }
             // else: filling is still going on. But for the same CUDA
             // stream (which would be a bit strange but fine), we can just
@@ -76,7 +75,7 @@ namespace cms {
             data.m_fillingStream = cudaStream;
             // Record in the cudaStream an event to mark the readiness of the
             // EventSetup data on the GPU, so other streams can check for it
-            cudaCheck(cudaEventRecord(data.m_event.get(), cudaStream));
+            cudaEventRecord(data.m_event.get(), cudaStream);
             // Now the filling has been enqueued to the cudaStream, so we
             // can return the GPU data immediately, since all subsequent
             // work must be either enqueued to the cudaStream, or the cudaStream

@@ -8,7 +8,9 @@ namespace cms::alpakatools {
   void StreamCache::Deleter::operator()(cudaStream_t stream) const {
     if (device_ != -1) {
       ScopedSetDevice deviceGuard{device_};
-      cudaCheck(cudaStreamDestroy(stream));
+#ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
+      cudaStreamDestroy(stream);
+#endif
     }
   }
 
@@ -17,13 +19,14 @@ namespace cms::alpakatools {
   StreamCache::StreamCache() : cache_(deviceCount()) {}
 
   SharedStreamPtr StreamCache::get() {
+
     const auto dev = currentDevice();
     return cache_[dev].makeOrGet([dev]() {
       cudaStream_t stream;
-      cudaCheck(cudaStreamCreateWithFlags(&stream, cudaStreamNonBlocking));
+      cudaStreamCreateWithFlags(&stream, cudaStreamNonBlocking);
       return std::unique_ptr<BareStream, Deleter>(stream, Deleter{dev});
     });
-  }
+}
 
   void StreamCache::clear() {
     // Reset the contents of the caches, but leave an

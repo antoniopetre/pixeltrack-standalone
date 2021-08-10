@@ -16,11 +16,11 @@
 const SiPixelFedCablingMapGPU* SiPixelFedCablingMapGPUWrapper::getGPUProductAsync(cudaStream_t cudaStream) const {
   const auto& data = gpuData_.dataForCurrentDeviceAsync(cudaStream, [this](GPUData& data, cudaStream_t stream) {
     // allocate
-    cudaCheck(cudaMalloc(&data.cablingMapDevice, sizeof(SiPixelFedCablingMapGPU)));
+    cudaMalloc(&data.cablingMapDevice, sizeof(SiPixelFedCablingMapGPU));
 
     // transfer
-    cudaCheck(cudaMemcpyAsync(
-        data.cablingMapDevice, this->cablingMapHost, sizeof(SiPixelFedCablingMapGPU), cudaMemcpyDefault, stream));
+    cudaMemcpyAsync(
+        data.cablingMapDevice, this->cablingMapHost, sizeof(SiPixelFedCablingMapGPU), cudaMemcpyDefault, stream);
   });
   return data.cablingMapDevice;
 }
@@ -28,12 +28,12 @@ const SiPixelFedCablingMapGPU* SiPixelFedCablingMapGPUWrapper::getGPUProductAsyn
 const unsigned char* SiPixelFedCablingMapGPUWrapper::getModToUnpAllAsync(cudaStream_t cudaStream) const {
   const auto& data =
       modToUnp_.dataForCurrentDeviceAsync(cudaStream, [this](ModulesToUnpack& data, cudaStream_t stream) {
-        cudaCheck(cudaMalloc((void**)&data.modToUnpDefault, pixelgpudetails::MAX_SIZE_BYTE_BOOL));
-        cudaCheck(cudaMemcpyAsync(data.modToUnpDefault,
+        cudaMalloc((void**)&data.modToUnpDefault, pixelgpudetails::MAX_SIZE_BYTE_BOOL);
+        cudaMemcpyAsync(data.modToUnpDefault,
                                   this->modToUnpDefault.data(),
                                   this->modToUnpDefault.size() * sizeof(unsigned char),
                                   cudaMemcpyDefault,
-                                  stream));
+                                  stream);
       });
   return data.modToUnpDefault;
 }

@@ -9,7 +9,9 @@ namespace cms::alpakatools {
   void EventCache::Deleter::operator()(cudaEvent_t event) const {
     if (device_ != -1) {
       ScopedSetDevice deviceGuard{device_};
-      cudaCheck(cudaEventDestroy(event));
+#ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
+      cudaEventDestroy(event);
+#endif
     }
   }
 
@@ -45,7 +47,7 @@ namespace cms::alpakatools {
     return cache_[dev].makeOrGet([dev]() {
       cudaEvent_t event;
       // it should be a bit faster to ignore timings
-      cudaCheck(cudaEventCreateWithFlags(&event, cudaEventDisableTiming));
+      cudaEventCreateWithFlags(&event, cudaEventDisableTiming);
       return std::unique_ptr<BareEvent, Deleter>(event, Deleter{dev});
     });
   }

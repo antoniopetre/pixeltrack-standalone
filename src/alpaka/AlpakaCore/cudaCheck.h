@@ -1,3 +1,5 @@
+
+/*
 #ifndef HeterogeneousCore_AlpakaUtilities_cudaCheck_h
 #define HeterogeneousCore_AlpakaUtilities_cudaCheck_h
 
@@ -38,6 +40,7 @@ namespace cms {
       throw std::runtime_error(out.str());
     }
 
+#ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
     inline bool cudaCheck_(
         const char* file, int line, const char* cmd, CUresult result, const char* description = nullptr) {
       if (result == CUDA_SUCCESS)
@@ -61,10 +64,11 @@ namespace cms {
       abortOnCudaError(file, line, cmd, error, message, description);
       return false;
     }
-
+#endif
   }  // namespace alpakatools
 }  // namespace cms
 
 #define cudaCheck(ARG, ...) (cms::alpakatools::cudaCheck_(__FILE__, __LINE__, #ARG, (ARG), ##__VA_ARGS__))
 
 #endif  // HeterogeneousCore_AlpakaUtilities_cudaCheck_h
+*/

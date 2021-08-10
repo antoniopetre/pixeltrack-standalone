@@ -22,8 +22,6 @@ namespace cms {
       } else if (ret == cudaErrorNotReady) {
         return false;
       }
-      // leave error case handling to cudaCheck
-      cudaCheck(ret);
       return false;  // to keep compiler happy
     }
   }  // namespace alpakatools

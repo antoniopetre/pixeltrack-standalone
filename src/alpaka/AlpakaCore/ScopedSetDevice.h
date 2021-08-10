@@ -10,8 +10,10 @@ namespace cms {
     class ScopedSetDevice {
     public:
       explicit ScopedSetDevice(int newDevice) {
-        cudaCheck(cudaGetDevice(&prevDevice_));
-        cudaCheck(cudaSetDevice(newDevice));
+#ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
+        cudaGetDevice(&prevDevice_);
+        cudaSetDevice(newDevice);
+#endif
       }
 
       ~ScopedSetDevice() {

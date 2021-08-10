@@ -28,55 +28,43 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     pixelCPEforGPU::ParamsOnGPU const* params() const { return alpaka::getPtrNative(m_params); }
 
-    // The return value can only be used safely in kernels launched on
+  // The return value can only be used safely in kernels launched on
   // the same cudaStream, or after cudaStreamSynchronize.
   const pixelCPEforGPU::ParamsOnGPU getGPUProductAsync(cudaStream_t cudaStream) const {
     
     const auto &data = gpuData_.dataForCurrentDeviceAsync(cudaStream, [this](GPUData &data, cudaStream_t stream) {
     // and now copy to device...
-    #ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
-    // data.h_paramsOnGPU.m_commonParams = cms::alpakatools::allocDeviceBuf<pixelCPEforGPU::CommonParams>(1u);
-    // data.h_paramsOnGPU.m_detParams = cms::alpakatools::allocDeviceBuf(this->m_detParams.size());
-    // data.h_paramsOnGPU.m_averageGeometry = cms::alpakatools::allocDeviceBuf(1);
-    // data.h_paramsOnGPU.m_layerGeometry = cms::alpakatools::allocDeviceBuf(1);
-    // data.d_paramsOnGPU = cms::alpakatools::allocDeviceBuf(1);
-
-
-    cudaMalloc((void **)&data.h_paramsOnGPU.m_commonParams, sizeof(pixelCPEforGPU::CommonParams));
-    // cudaMalloc((void **)&data.h_paramsOnGPU.m_detParams,
-    //                     this->m_detParams.size() * sizeof(pixelCPEforGPU::DetParams)); //size doesn't exist
-    cudaMalloc((void **)&data.h_paramsOnGPU.m_averageGeometry, sizeof(pixelCPEforGPU::AverageGeometry));
-    cudaMalloc((void **)&data.h_paramsOnGPU.m_layerGeometry, sizeof(pixelCPEforGPU::LayerGeometry));
-    cudaMalloc((void **)&data.d_paramsOnGPU, sizeof(pixelCPEforGPU::ParamsOnGPU));
-
-    cudaMemcpyAsync(
-        data.d_paramsOnGPU, &data.h_paramsOnGPU, sizeof(pixelCPEforGPU::ParamsOnGPU), cudaMemcpyDefault, stream);
-    cudaMemcpyAsync((void *)data.h_paramsOnGPU.m_commonParams,
-                              &this->m_commonParams,
-                              sizeof(pixelCPEforGPU::CommonParams),
-                              cudaMemcpyDefault,
-                              stream);
-    cudaMemcpyAsync((void *)data.h_paramsOnGPU.m_averageGeometry,
-                              &this->m_averageGeometry,
-                              sizeof(pixelCPEforGPU::AverageGeometry),
-                              cudaMemcpyDefault,
-                              stream);
-    cudaMemcpyAsync((void *)data.h_paramsOnGPU.m_layerGeometry,
-                              &this->m_layerGeometry,
-                              sizeof(pixelCPEforGPU::LayerGeometry),
-                              cudaMemcpyDefault,
-                              stream);
-    cudaMemcpyAsync((void *)data.h_paramsOnGPU.m_detParams,
-                              alpaka::getPtrNative(this->m_detParams),
-                              sizeof(alpaka::getPtrNative(this->m_detParams)),
-                              cudaMemcpyDefault,
-                              stream); //size + data dont exist
+    auto cParams = cms::alpakatools::allocDeviceBuf<pixelCPEforGPU::CommonParams>(1u);
+    data.h_paramsOnGPU.m_commonParams = alpaka::getPtrNative(cParams);
     
-    #endif
+    uint32_t size_detParams = alpaka::extent::getExtentVec(this->m_detParams)[0u];
+    auto detParams = cms::alpakatools::allocDeviceBuf<pixelCPEforGPU::DetParams>(size_detParams);
+    data.h_paramsOnGPU.m_detParams = alpaka::getPtrNative(detParams);
+
+    auto avgGeom = cms::alpakatools::allocDeviceBuf<pixelCPEforGPU::AverageGeometry>(1u);
+    data.h_paramsOnGPU.m_averageGeometry = alpaka::getPtrNative(avgGeom);
+    
+    auto layerGeom = cms::alpakatools::allocDeviceBuf<pixelCPEforGPU::LayerGeometry>(1u);
+    data.h_paramsOnGPU.m_layerGeometry = alpaka::getPtrNative(layerGeom);
+    
+    auto parGPU = cms::alpakatools::allocDeviceBuf<pixelCPEforGPU::ParamsOnGPU>(1u);
+    data.d_paramsOnGPU = alpaka::getPtrNative(parGPU);
+    
+    alpaka::prepareForAsyncCopy(cParams);
+    alpaka::prepareForAsyncCopy(detParams);
+    alpaka::prepareForAsyncCopy(avgGeom);
+    alpaka::prepareForAsyncCopy(layerGeom);
+    alpaka::prepareForAsyncCopy(parGPU);
+
+    // alpaka::memcpy(queue, data.d_paramsOnGPU, data.h_paramsOnGPU, 1u);
+    // alpaka::memcpy(queue, data.h_paramsOnGPU.m_commonParams, this->m_commonParamsGPU, 1u);
+    // alpaka::memcpy(queue, data.h_paramsOnGPU.m_averageGeometry, this->m_averageGeometry, 1u);
+    // alpaka::memcpy(queue, data.h_paramsOnGPU.m_layerGeometry, this->m_layerGeometry, 1u);
+    // alpaka::memcpy(queue, data.h_paramsOnGPU.m_detParams, this->m_detParamsGPU.data(), size_detParams);
   });
-  #ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
+#ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
   return *data.d_paramsOnGPU;
-  #endif
+#endif
   return data.h_paramsOnGPU;
 }
 

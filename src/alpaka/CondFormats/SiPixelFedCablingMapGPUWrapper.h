@@ -32,16 +32,16 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     bool hasQuality_;
 
     //std::vector<unsigned char, cms::cuda::HostAllocator<unsigned char>> modToUnpDefault;
-    //AlpakaHostBuf<unsigned char> modToUnpDefault;
+    // AlpakaDeviceBuf<unsigned char> modToUnpDefault;
 
-    /*
+    #ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
     struct GPUData {
       CablingMapDeviceBuf cablingMapDevice;
        ~GPUData() {
 
        }
     };
-    cms::alpakatools::ESProduct<GPUData> gpuData_;
+    // cms::alpakatools::ESProduct<GPUData> gpuData_;
 
     struct ModulesToUnpack {
       
@@ -50,8 +50,9 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
       }
     };
-    cms::alpakatools::ESProduct<ModulesToUnpack> modToUnp_;
-    */
+    // cms::alpakatools::ESProduct<ModulesToUnpack> modToUnp_;
+    #endif
+    
     };
 
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
