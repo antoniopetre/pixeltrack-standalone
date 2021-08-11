@@ -42,12 +42,12 @@ namespace cms {
         // really matter between modules (or across TBB tasks).
         explicit ScopedContextBase(edm::StreamID streamID);
 
-        // explicit ScopedContextBase(const ProductBase& data);
+        explicit ScopedContextBase(const ProductBase& data);
 
         template <typename T_Acc>
         explicit ScopedContextBase(T_Acc acc, const ProductBase& data);
 
-        // explicit ScopedContextBase(int device, SharedStreamPtr stream);
+        explicit ScopedContextBase(int device, SharedStreamPtr stream);
 
         template <typename T_Acc>
         explicit ScopedContextBase(T_Acc acc, edm::StreamID streamID);
@@ -194,10 +194,10 @@ namespace cms {
           : ScopedContextGetterBase(state.device(), state.releaseStreamPtr()) {}
 
       template <typename T_Acc>
-      explicit ScopedContextProduce(T_Acc acc, const ProductBase& data) : ScopedContextGetterBase(data, acc) {}
+      explicit ScopedContextProduce(T_Acc acc, const ProductBase& data) : ScopedContextGetterBase(acc, data) {}
 
       template <typename T_Acc>
-      explicit ScopedContextProduce(T_Acc acc, edm::StreamID streamID) : ScopedContextGetterBase(streamID, acc) {}
+      explicit ScopedContextProduce(T_Acc acc, edm::StreamID streamID) : ScopedContextGetterBase(acc, streamID) {}
 
       /// Record the CUDA event, all asynchronous work must have been queued before the destructor
       ~ScopedContextProduce();
