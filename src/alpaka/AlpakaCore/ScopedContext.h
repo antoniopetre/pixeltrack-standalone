@@ -42,12 +42,12 @@ namespace cms {
         // really matter between modules (or across TBB tasks).
         explicit ScopedContextBase(edm::StreamID streamID);
 
-        explicit ScopedContextBase(const ProductBase& data);
+        // explicit ScopedContextBase(const ProductBase& data);
 
         template <typename T_Acc>
         explicit ScopedContextBase(T_Acc acc, const ProductBase& data);
 
-        explicit ScopedContextBase(int device, SharedStreamPtr stream);
+        // explicit ScopedContextBase(int device, SharedStreamPtr stream);
 
         template <typename T_Acc>
         explicit ScopedContextBase(T_Acc acc, edm::StreamID streamID);
@@ -73,6 +73,9 @@ namespace cms {
       protected:
         template <typename... Args>
         ScopedContextGetterBase(Args&&... args) : ScopedContextBase(std::forward<Args>(args)...) {}
+
+        template <typename T_Acc, typename... Args>
+        ScopedContextGetterBase(T_Acc acc, Args&&... args) : ScopedContextBase(acc, std::forward<Args>(args)...) {}
 
         void synchronizeStreams(int dataDevice, Queue dataStream, bool available, alpaka::Event<Queue> dataEvent);
       };
@@ -106,24 +109,51 @@ namespace cms {
     class ScopedContextAcquire : public impl::ScopedContextGetterBase {
     public:
       /// Constructor to create a new CUDA stream (no need for context beyond acquire())
-      explicit ScopedContextAcquire(edm::StreamID streamID, edm::WaitingTaskWithArenaHolder waitingTaskHolder)
-          : ScopedContextGetterBase(streamID), holderHelper_{std::move(waitingTaskHolder)} {}
+      // explicit ScopedContextAcquire(edm::StreamID streamID, edm::WaitingTaskWithArenaHolder waitingTaskHolder)
+      //     : ScopedContextGetterBase(streamID), holderHelper_{std::move(waitingTaskHolder)} {}
 
       /// Constructor to create a new CUDA stream, and the context is needed after acquire()
-      explicit ScopedContextAcquire(edm::StreamID streamID,
-                                    edm::WaitingTaskWithArenaHolder waitingTaskHolder,
-                                    ContextState& state)
-          : ScopedContextGetterBase(streamID), holderHelper_{std::move(waitingTaskHolder)}, contextState_{&state} {}
+      // explicit ScopedContextAcquire(edm::StreamID streamID,
+      //                               edm::WaitingTaskWithArenaHolder waitingTaskHolder,
+      //                               ContextState& state)
+      //     : ScopedContextGetterBase(streamID), holderHelper_{std::move(waitingTaskHolder)}, contextState_{&state} {}
 
       /// Constructor to (possibly) re-use a CUDA stream (no need for context beyond acquire())
-      explicit ScopedContextAcquire(const ProductBase& data, edm::WaitingTaskWithArenaHolder waitingTaskHolder)
-          : ScopedContextGetterBase(data), holderHelper_{std::move(waitingTaskHolder)} {}
+      // explicit ScopedContextAcquire(const ProductBase& data, edm::WaitingTaskWithArenaHolder waitingTaskHolder)
+      //     : ScopedContextGetterBase(data), holderHelper_{std::move(waitingTaskHolder)} {}
 
       /// Constructor to (possibly) re-use a CUDA stream, and the context is needed after acquire()
-      explicit ScopedContextAcquire(const ProductBase& data,
+      // explicit ScopedContextAcquire(const ProductBase& data,
+      //                               edm::WaitingTaskWithArenaHolder waitingTaskHolder,
+      //                               ContextState& state)
+      //     : ScopedContextGetterBase(data), holderHelper_{std::move(waitingTaskHolder)}, contextState_{&state} {}
+
+      
+
+
+      /// Constructor to create a new CUDA stream (no need for context beyond acquire())
+      template <typename T_Acc>
+      explicit ScopedContextAcquire(T_Acc acc,edm::StreamID streamID, edm::WaitingTaskWithArenaHolder waitingTaskHolder)
+          : ScopedContextGetterBase(acc, streamID), holderHelper_{std::move(waitingTaskHolder)} {}
+
+      // /// Constructor to create a new CUDA stream, and the context is needed after acquire()
+      template <typename T_Acc>
+      explicit ScopedContextAcquire(T_Acc acc, edm::StreamID streamID,
                                     edm::WaitingTaskWithArenaHolder waitingTaskHolder,
                                     ContextState& state)
-          : ScopedContextGetterBase(data), holderHelper_{std::move(waitingTaskHolder)}, contextState_{&state} {}
+          : ScopedContextGetterBase(acc, streamID), holderHelper_{std::move(waitingTaskHolder)}, contextState_{&state} {}
+
+      // /// Constructor to (possibly) re-use a CUDA stream (no need for context beyond acquire())
+      template <typename T_Acc>
+      explicit ScopedContextAcquire(T_Acc acc, const ProductBase& data, edm::WaitingTaskWithArenaHolder waitingTaskHolder)
+          : ScopedContextGetterBase(acc, data), holderHelper_{std::move(waitingTaskHolder)} {}
+
+      // /// Constructor to (possibly) re-use a CUDA stream, and the context is needed after acquire()
+      template <typename T_Acc>
+      explicit ScopedContextAcquire(T_Acc acc, const ProductBase& data,
+                                    edm::WaitingTaskWithArenaHolder waitingTaskHolder,
+                                    ContextState& state)
+          : ScopedContextGetterBase(acc, data), holderHelper_{std::move(waitingTaskHolder)}, contextState_{&state} {}
 
       ~ScopedContextAcquire();
 
@@ -164,10 +194,10 @@ namespace cms {
           : ScopedContextGetterBase(state.device(), state.releaseStreamPtr()) {}
 
       template <typename T_Acc>
-      explicit ScopedContextProduce(T_Acc acc, const ProductBase& data) : ScopedContextGetterBase(acc, data) {}
+      explicit ScopedContextProduce(T_Acc acc, const ProductBase& data) : ScopedContextGetterBase(data, acc) {}
 
       template <typename T_Acc>
-      explicit ScopedContextProduce(T_Acc acc, edm::StreamID streamID) : ScopedContextGetterBase(acc, streamID) {}
+      explicit ScopedContextProduce(T_Acc acc, edm::StreamID streamID) : ScopedContextGetterBase(streamID, acc) {}
 
       /// Record the CUDA event, all asynchronous work must have been queued before the destructor
       ~ScopedContextProduce();
