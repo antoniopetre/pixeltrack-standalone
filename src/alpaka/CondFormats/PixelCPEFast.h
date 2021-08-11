@@ -28,12 +28,22 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     pixelCPEforGPU::ParamsOnGPU const* params() const { return alpaka::getPtrNative(m_params); }
 
+    template <typename T_Acc, typename Data> 
+    cms::alpakatools::ESProduct<Data> getGPUData(T_Acc acc) {
+      cms::alpakatools::ESProduct<Data> gpuData_(acc);
+      return gpuData_;
+    }
+
   // The return value can only be used safely in kernels launched on
   // the same cudaStream, or after cudaStreamSynchronize.
-  const pixelCPEforGPU::ParamsOnGPU getGPUProductAsync(Queue queue) const {
+  
+  template <typename T_Acc>
+  const pixelCPEforGPU::ParamsOnGPU getGPUProductAsync(T_Acc acc, Queue queue) const {
+
+    auto gpuData_ = getGPUData<T_Acc, GPUData>(acc);
     
     const auto &data = gpuData_.dataForCurrentDeviceAsync(queue, [this](GPUData &data, Queue queue) {
-    and now copy to device...
+    // and now copy to device...
     auto cParams = cms::alpakatools::allocDeviceBuf<pixelCPEforGPU::CommonParams>(1u);
     data.h_paramsOnGPU.m_commonParams = alpaka::getPtrNative(cParams);
     
@@ -57,16 +67,17 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     alpaka::prepareForAsyncCopy(parGPU);
 
     alpaka::memcpy(queue, data.d_paramsOnGPU, data.h_paramsOnGPU, 1u);
-    alpaka::memcpy(queue, data.h_paramsOnGPU.m_commonParams, this->m_commonParamsGPU, 1u);
+    alpaka::memcpy(queue, data.h_paramsOnGPU.m_commonParams, this->m_commonParams, 1u);
     alpaka::memcpy(queue, data.h_paramsOnGPU.m_averageGeometry, this->m_averageGeometry, 1u);
     alpaka::memcpy(queue, data.h_paramsOnGPU.m_layerGeometry, this->m_layerGeometry, 1u);
-    alpaka::memcpy(queue, data.h_paramsOnGPU.m_detParams, this->m_detParamsGPU.data(), size_detParams);
+    alpaka::memcpy(queue, data.h_paramsOnGPU.m_detParams, alpaka::getPtrNative(this->m_detParams), size_detParams);
   });
 #ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
   return *data.d_paramsOnGPU;
 #endif
   return data.h_paramsOnGPU;
 }
+
 
   private:
     AlpakaDeviceBuf<pixelCPEforGPU::CommonParams> m_commonParams;
@@ -86,7 +97,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
        }
      }
   };
-  cms::alpakatools::ESProduct<GPUData> gpuData_(ALPAKA_ACCELERATOR_NAMESPACE::DevAcc1);
+  //cms::alpakatools::ESProduct<GPUData> gpuData_;
   };
 
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
