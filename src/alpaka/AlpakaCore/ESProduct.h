@@ -16,12 +16,21 @@ namespace cms {
     template <typename T>
     class ESProduct {
     public:
-      ESProduct() : gpuDataPerDevice_(cms::alpakatools::deviceCount()) {
+      template <typename T_Acc>
+      ESProduct(T_Acc acc) : gpuDataPerDevice_(cms::alpakatools::deviceCount()) {
         for (size_t i = 0; i < gpuDataPerDevice_.size(); ++i) {
-          gpuDataPerDevice_[i].m_event = getEventCache().get(ALPAKA_ACCELERATOR_NAMESPACE::device);
+          gpuDataPerDevice_[i].m_event = getEventCache().get(acc);
         }
       }
-      ~ESProduct() = default;
+
+      ~ESProduct(){
+        for (size_t i = 0; i < gpuDataPerDevice_.size(); ++i) {
+      #ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
+          cudaEventDestroy(gpuDataPerDevice_[i].m_event.get());
+      #endif
+          // EventCache::Deleter::operator()(gpuDataPerDevice_[i].m_event.get());
+        }
+      };
 
       // transferAsync should be a function of (T&, cudaStream_t)
       // which enqueues asynchronous transfers (possibly kernels as well)
