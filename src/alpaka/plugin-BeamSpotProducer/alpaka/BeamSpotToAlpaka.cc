@@ -4,6 +4,7 @@
 #include "Framework/Event.h"
 #include "Framework/EventSetup.h"
 #include "Framework/PluginFactory.h"
+#include "AlpakaCore/ScopedContext.h"
 
 namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
@@ -26,13 +27,20 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     auto const& bsRaw = iSetup.get<BeamSpotPOD>();
 
     // TO DO: Add inter-event parallelization. cms::alpaka::ScopedContextProduce?
-    // cms::alpaka::ScopedContextProduce ctx{iEvent.streamID()};
-    Queue queue(device);
-    BeamSpotAlpaka bs{&bsRaw, queue};
+    cms::alpakatools::ScopedContextProduce ctx = cms::alpakatools::ScopedContextProduce(ALPAKA_ACCELERATOR_NAMESPACE::device, iEvent.streamID());
+    // Queue queue(device);
+    // cms::alpakatools::ScopedContextProduce ctx{iEvent.streamID()};
 
-    iEvent.emplace(bsPutToken_, std::move(bs));
+    // BeamSpotAlpaka bsDevice(ctx.stream());
+    // cms::alpakatools::copyAsync(bsDevice.ptr(), bsHost, ctx.stream());
 
-    alpaka::wait(queue);
+    // ctx.emplace(iEvent, bsPutToken_, std::move(bsDevice));
+
+    // BeamSpotAlpaka bs{&bsRaw, queue};
+
+    // iEvent.emplace(bsPutToken_, std::move(bs));
+
+    // alpaka::wait(queue);
   }
 
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE

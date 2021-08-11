@@ -144,6 +144,7 @@ int main(int argc, char** argv) {
       auto addModules = [&](std::string const& prefix, Backend backend) {
         if (std::find(backends.begin(), backends.end(), backend) != backends.end()) {
           edmodules.emplace_back(prefix + "BeamSpotToAlpaka");
+          /*
           edmodules.emplace_back(prefix + "SiPixelRawToCluster");
           edmodules.emplace_back(prefix + "SiPixelRecHitAlpaka");
           edmodules.emplace_back(prefix + "CAHitNtupletAlpaka");
@@ -158,7 +159,7 @@ int main(int argc, char** argv) {
           if (histogram) {
             edmodules.emplace_back(prefix + "HistoValidator");
           }
-
+          */
           esmodules.emplace_back(prefix + "SiPixelFedCablingMapESProducer");
           esmodules.emplace_back(prefix + "SiPixelGainCalibrationForHLTESProducer");
           esmodules.emplace_back(prefix + "PixelCPEFastESProducer");
@@ -175,6 +176,9 @@ int main(int argc, char** argv) {
 
   std::cout << "Processing " << maxEvents << " events, of which " << numberOfStreams << " concurrently, with "
             << numberOfThreads << " threads." << std::endl;
+  transfer = true;
+  histogram = transfer;
+  transfer = histogram;
 
   // Run work
   auto start = std::chrono::high_resolution_clock::now();
