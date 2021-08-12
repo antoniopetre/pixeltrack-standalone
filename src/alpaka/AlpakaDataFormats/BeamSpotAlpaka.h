@@ -14,12 +14,19 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     BeamSpotAlpaka() = default;
 
     BeamSpotAlpaka(BeamSpotPOD const* data, Queue queue) : data_d{cms::alpakatools::allocDeviceBuf<BeamSpotPOD>(1u)} {
-      auto data_h{cms::alpakatools::allocHostBuf<BeamSpotPOD>(1u)};
-      alpaka::getPtrNative(data_h)[0] = *data;
+      auto data_h{cms::alpakatools::createHostView<const BeamSpotPOD>(data, 1u)};
 
-      alpaka::prepareForAsyncCopy(data_h);
       alpaka::memcpy(queue, data_d, data_h, 1u);
+      // alpaka::wait(queue);
     }
+
+    // BeamSpotAlpaka(BeamSpotPOD const* data, Queue queue) : data_d{cms::alpakatools::allocDeviceBuf<BeamSpotPOD>(1u)} {
+    //   auto data_h{cms::alpakatools::allocHostBuf<BeamSpotPOD>(1u)};
+    //   alpaka::getPtrNative(data_h)[0] = *data;
+
+    //   alpaka::prepareForAsyncCopy(data_h);
+    //   alpaka::memcpy(queue, data_d, data_h, 1u);
+    // }
 
     // BeamSpotCUDA(Queue stream) { data_d2 = cms::alpakatools::make_device_unique<BeamSpotPOD>(stream); }
 

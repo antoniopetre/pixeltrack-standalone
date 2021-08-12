@@ -5,9 +5,11 @@ namespace cms {
   namespace alpakatools {
 
     template <typename T_Acc>
-    ALPAKA_FN_ACC ALPAKA_FN_INLINE auto createQueueNonBlocking(T_Acc const& acc) {
-      using AccQueueProperty = alpaka::NonBlocking;
-      alpaka::Queue<T_Acc, AccQueueProperty> x(acc);
+    ALPAKA_FN_INLINE auto createQueueNonBlocking(T_Acc const& acc) {
+    // #ifdef ALPAKA_ACC_GPU_CUDA_ENABLED || 
+      // using AccQueueProperty = alpaka::NonBlocking;
+      // alpaka::Queue<T_Acc, AccQueueProperty> x(acc);
+      cms::alpakatools::Queue x(acc);
       return x;
     }
 

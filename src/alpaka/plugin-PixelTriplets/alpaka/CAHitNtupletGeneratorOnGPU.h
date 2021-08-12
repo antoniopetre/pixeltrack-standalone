@@ -38,7 +38,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
     ~CAHitNtupletGeneratorOnGPU();
 
-    PixelTrackAlpaka makeTuplesAsync(TrackingRecHit2DAlpaka const& hits_d, float bfield, Queue& queue) const;
+    PixelTrackAlpaka makeTuplesAsync(TrackingRecHit2DAlpaka const& hits_d, float bfield, Queue queue) const;
 
   private:
 #ifdef TODO

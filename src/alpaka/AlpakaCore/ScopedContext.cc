@@ -58,12 +58,12 @@ namespace cms::alpakatools {
       }
     }
 
-    ScopedContextBase::ScopedContextBase(int device, SharedStreamPtr stream)
-        : currentDevice_(device), stream_(std::move(stream)) {
-     #ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
-      cudaSetDevice(currentDevice_);
-    #endif
-    }
+    // ScopedContextBase::ScopedContextBase(int device, SharedStreamPtr stream)
+    //     : currentDevice_(device), stream_(std::move(stream)) {
+    //  #ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
+    //   cudaSetDevice(currentDevice_);
+    // #endif
+    // }
 
     ////////////////////
 
@@ -93,8 +93,12 @@ namespace cms::alpakatools {
     void ScopedContextHolderHelper::enqueueCallback(int device, Queue stream) {
     //   cudaStreamAddCallback(stream, cudaScopedContextCallback, new CallbackData{waitingTaskHolder_, device}, 0);
       alpaka::enqueue(stream, [this, device]() {
-          auto x = new CallbackData{waitingTaskHolder_, device};
-        //   cudaScopedContextCallback(new CallbackData{waitingTaskHolder_, device});
+          auto data = new CallbackData{waitingTaskHolder_, device};
+
+          std::unique_ptr<CallbackData> guard{reinterpret_cast<CallbackData*>(data)};
+          edm::WaitingTaskWithArenaHolder& waitingTaskHolder = guard->holder;
+          int device2 = guard->device;
+          waitingTaskHolder.doneWaiting(nullptr);
         // TODO ANTONIO
       });
     }

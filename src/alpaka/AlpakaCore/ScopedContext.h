@@ -49,7 +49,13 @@ namespace cms {
         template <typename T_Acc>
         explicit ScopedContextBase(T_Acc acc, const ProductBase& data);
 
-        explicit ScopedContextBase(int device, SharedStreamPtr stream);
+        // explicit ScopedContextBase(int device, SharedStreamPtr stream);
+        explicit ScopedContextBase(int device, SharedStreamPtr stream)
+        : currentDevice_(device), stream_(std::move(stream)) {
+        #ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
+          cudaSetDevice(currentDevice_);
+        #endif
+        }
 
         // template <typename T_Acc>
         // explicit ScopedContextBase(T_Acc acc, edm::StreamID streamID);
@@ -82,11 +88,11 @@ namespace cms {
         }
 
       protected:
-        // template <typename... Args>
-        // ScopedContextGetterBase(Args&&... args) : ScopedContextBase(std::forward<Args>(args)...) {}
+        template <typename... Args>
+        ScopedContextGetterBase(Args&&... args) : ScopedContextBase(std::forward<Args>(args)...) {}
 
-        template <typename T_Acc, typename... Args>
-        ScopedContextGetterBase(T_Acc acc, Args&&... args) : ScopedContextBase(acc, std::forward<Args>(args)...) {}
+        // template <typename T_Acc, typename... Args>
+        // ScopedContextGetterBase(T_Acc acc, Args&&... args) : ScopedContextBase(acc, std::forward<Args>(args)...) {}
 
         void synchronizeStreams(int dataDevice, Queue dataStream, bool available, alpaka::Event<Queue> dataEvent);
       };

@@ -102,7 +102,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     };
 #endif
 
-    ZVertexAlpaka Producer::makeAsync(TkSoA const* tksoa, float ptMin, Queue& queue) const {
+    ZVertexAlpaka Producer::makeAsync(TkSoA const* tksoa, float ptMin, Queue queue) const {
       // std::cout << "producing Vertices on GPU" << std::endl;
       assert(tksoa);
 

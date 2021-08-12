@@ -90,7 +90,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
 
   PixelTrackAlpaka CAHitNtupletGeneratorOnGPU::makeTuplesAsync(TrackingRecHit2DAlpaka const& hits_d,
                                                                float bfield,
-                                                               Queue& queue) const {
+                                                               Queue queue) const {
     PixelTrackAlpaka tracks{cms::alpakatools::allocDeviceBuf<pixelTrack::TrackSoA>(1u)};
     auto* soa = alpaka::getPtrNative(tracks);
 

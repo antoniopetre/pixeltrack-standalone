@@ -8,6 +8,7 @@
 #include "Framework/PluginFactory.h"
 #include "Framework/EDProducer.h"
 #include "Framework/RunningAverage.h"
+#include "AlpakaCore/ScopedContext.h"
 
 #include "gpuVertexFinder.h"
 
@@ -49,8 +50,10 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     auto const& tracksBuf = iEvent.get(tokenTrack_);
     auto const tracks = alpaka::getPtrNative(tracksBuf);
 
-    Queue queue(device);
-    iEvent.emplace(tokenVertex_, m_gpuAlgo.makeAsync(tracks, m_ptMin, queue));
+    // Queue queue(device);
+    // iEvent.emplace(tokenVertex_, m_gpuAlgo.makeAsync(tracks, m_ptMin, queue));
+    cms::alpakatools::ScopedContextProduce ctx{ALPAKA_ACCELERATOR_NAMESPACE::device, iEvent.streamID()};
+    ctx.emplace(ALPAKA_ACCELERATOR_NAMESPACE::device, iEvent, tokenVertex_, m_gpuAlgo.makeAsync(tracks, m_ptMin, ctx.stream()));
   }
 
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE

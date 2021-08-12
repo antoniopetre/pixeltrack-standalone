@@ -192,7 +192,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                              bool useQualityInfo,
                              bool includeErrors,
                              bool debug,
-                             Queue& queue);
+                             Queue queue);
 
       std::pair<SiPixelDigisAlpaka, SiPixelClustersAlpaka> getResults() {
         auto pnModules_Clusters_h = alpaka::getPtrNative(nModules_Clusters_h);

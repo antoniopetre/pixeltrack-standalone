@@ -552,7 +552,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                                          bool useQualityInfo,
                                                          bool includeErrors,
                                                          bool debug,
-                                                         Queue &queue) {
+                                                         Queue queue) {
       nDigis = wordCounter;
 
 #ifdef GPU_DEBUG
