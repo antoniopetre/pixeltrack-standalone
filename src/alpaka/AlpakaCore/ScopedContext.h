@@ -12,6 +12,8 @@
 #include "AlpakaCore/EventCache.h"
 #include "AlpakaCore/SharedEventPtr.h"
 #include "AlpakaCore/SharedStreamPtr.h"
+#include "chooseDevice.h"
+#include "AlpakaCore/StreamCache.h"
 
 namespace cms {
   namespace alpakatest {
@@ -40,17 +42,26 @@ namespace cms {
         // functions relying on the current device should be called from
         // the scope where this context is. The current device doesn't
         // really matter between modules (or across TBB tasks).
-        explicit ScopedContextBase(edm::StreamID streamID);
+        // explicit ScopedContextBase(edm::StreamID streamID);
 
-        explicit ScopedContextBase(const ProductBase& data);
+        // explicit ScopedContextBase(const ProductBase& data);
 
         template <typename T_Acc>
         explicit ScopedContextBase(T_Acc acc, const ProductBase& data);
 
         explicit ScopedContextBase(int device, SharedStreamPtr stream);
 
+        // template <typename T_Acc>
+        // explicit ScopedContextBase(T_Acc acc, edm::StreamID streamID);
+
         template <typename T_Acc>
-        explicit ScopedContextBase(T_Acc acc, edm::StreamID streamID);
+        explicit ScopedContextBase(T_Acc acc, edm::StreamID streamID) : currentDevice_(cms::alpakatools::chooseDevice(streamID)) {
+        #ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
+          cudaSetDevice(currentDevice_);
+        #endif
+          stream_ = getStreamCache().get(acc);
+          //TODO ANTONIO
+        }
 
       private:
         int currentDevice_;
@@ -71,8 +82,8 @@ namespace cms {
         }
 
       protected:
-        template <typename... Args>
-        ScopedContextGetterBase(Args&&... args) : ScopedContextBase(std::forward<Args>(args)...) {}
+        // template <typename... Args>
+        // ScopedContextGetterBase(Args&&... args) : ScopedContextBase(std::forward<Args>(args)...) {}
 
         template <typename T_Acc, typename... Args>
         ScopedContextGetterBase(T_Acc acc, Args&&... args) : ScopedContextBase(acc, std::forward<Args>(args)...) {}
@@ -109,27 +120,6 @@ namespace cms {
     class ScopedContextAcquire : public impl::ScopedContextGetterBase {
     public:
       /// Constructor to create a new CUDA stream (no need for context beyond acquire())
-      // explicit ScopedContextAcquire(edm::StreamID streamID, edm::WaitingTaskWithArenaHolder waitingTaskHolder)
-      //     : ScopedContextGetterBase(streamID), holderHelper_{std::move(waitingTaskHolder)} {}
-
-      /// Constructor to create a new CUDA stream, and the context is needed after acquire()
-      // explicit ScopedContextAcquire(edm::StreamID streamID,
-      //                               edm::WaitingTaskWithArenaHolder waitingTaskHolder,
-      //                               ContextState& state)
-      //     : ScopedContextGetterBase(streamID), holderHelper_{std::move(waitingTaskHolder)}, contextState_{&state} {}
-
-      /// Constructor to (possibly) re-use a CUDA stream (no need for context beyond acquire())
-      // explicit ScopedContextAcquire(const ProductBase& data, edm::WaitingTaskWithArenaHolder waitingTaskHolder)
-      //     : ScopedContextGetterBase(data), holderHelper_{std::move(waitingTaskHolder)} {}
-
-      /// Constructor to (possibly) re-use a CUDA stream, and the context is needed after acquire()
-      // explicit ScopedContextAcquire(const ProductBase& data,
-      //                               edm::WaitingTaskWithArenaHolder waitingTaskHolder,
-      //                               ContextState& state)
-      //     : ScopedContextGetterBase(data), holderHelper_{std::move(waitingTaskHolder)}, contextState_{&state} {}
-
-      
-
 
       /// Constructor to create a new CUDA stream (no need for context beyond acquire())
       template <typename T_Acc>
@@ -184,10 +174,10 @@ namespace cms {
     class ScopedContextProduce : public impl::ScopedContextGetterBase {
     public:
       /// Constructor to create a new CUDA stream (non-ExternalWork module)
-      explicit ScopedContextProduce(edm::StreamID streamID) : ScopedContextGetterBase(streamID) {}
+      // explicit ScopedContextProduce(edm::StreamID streamID) : ScopedContextGetterBase(streamID) {}
 
       /// Constructor to (possibly) re-use a CUDA stream (non-ExternalWork module)
-      explicit ScopedContextProduce(const ProductBase& data) : ScopedContextGetterBase(data) {}
+      // explicit ScopedContextProduce(const ProductBase& data) : ScopedContextGetterBase(data) {}
 
       /// Constructor to re-use the CUDA stream of acquire() (ExternalWork module)
       explicit ScopedContextProduce(ContextState& state)
@@ -210,7 +200,9 @@ namespace cms {
 
       template <typename T_Acc, typename T, typename... Args>
       auto emplace(T_Acc acc, edm::Event& iEvent, edm::EDPutTokenT<T> token, Args&&... args) {
-        return iEvent.emplace(token, device(), streamPtr(), getEvent(acc), std::forward<Args>(args)...);
+        // return iEvent.emplace(token, device(), streamPtr(), getEvent(acc), std::forward<Args>(args)...);
+        return iEvent.emplace(token, std::forward<Args>(args)...);
+        // TODO ANTONIO
       }
 
     private:
@@ -273,7 +265,9 @@ namespace cms {
     class ScopedContextAnalyze : public impl::ScopedContextGetterBase {
     public:
       /// Constructor to (possibly) re-use a CUDA stream
-      explicit ScopedContextAnalyze(const ProductBase& data) : ScopedContextGetterBase(data) {}
+      // explicit ScopedContextAnalyze(const ProductBase& data) : ScopedContextGetterBase(data) {}
+      template <typename T_Acc>
+      explicit ScopedContextAnalyze(T_Acc acc, const ProductBase& data) : ScopedContextGetterBase(acc, data) {}
     };
 
     namespace impl {

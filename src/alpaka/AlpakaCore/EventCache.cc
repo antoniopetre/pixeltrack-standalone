@@ -2,7 +2,7 @@
 #include "AlpakaCore/currentDevice.h"
 #include "AlpakaCore/eventWorkHasCompleted.h"
 #include "AlpakaCore/ScopedSetDevice.h"
-#include "alpakaEventHelper.h"
+// #include "alpakaEventHelper.h"
 
 namespace cms::alpakatools {
   void EventCache::Deleter::operator()(alpaka::Event<Queue> *event) const {
@@ -45,19 +45,19 @@ namespace cms::alpakatools {
   }
 
 
-  template <typename T_Acc>
-  SharedEventPtr EventCache::makeOrGet(int dev, T_Acc acc) {
-    return cache_[dev].makeOrGet([dev, acc]() {
-      // alpaka::Event<Queue> event(dev);
-      auto event = cms::alpakatools::createEvent<Queue>(acc);
-      // it should be a bit faster to ignore timings
-#ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
-      cudaEventCreateWithFlags(event, cudaEventDisableTiming);
-#endif
-      return std::unique_ptr<BareEvent, Deleter>(event, Deleter{dev});
-// TODO ANTONIO
-    });
-  }
+//   template <typename T_Acc>
+//   SharedEventPtr EventCache::makeOrGet(int dev, T_Acc acc) {
+//     return cache_[dev].makeOrGet([dev, acc]() {
+//       // alpaka::Event<Queue> event(dev);
+//       auto event = cms::alpakatools::createEvent<Queue>(acc);
+//       // it should be a bit faster to ignore timings
+// #ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
+//       cudaEventCreateWithFlags(event, cudaEventDisableTiming);
+// #endif
+//       return std::unique_ptr<BareEvent, Deleter>(event, Deleter{dev});
+// // TODO ANTONIO
+//     });
+//   }
 
   void EventCache::clear() {
     // Reset the contents of the caches, but leave an

@@ -1,5 +1,5 @@
-#ifndef ALPAKAEVENT_H
-#define ALPAKAEVENT_H
+#ifndef ALPAKAQUEUE_H
+#define ALPAKAQUEUE_H
 
 namespace cms {
   namespace alpakatools {
@@ -14,4 +14,4 @@ namespace cms {
   }  // namespace alpakatools
 }  // namespace cms
 
-#endif  // ALPAKAEVENT_H
+#endif  // ALPAKAQUEUE_H

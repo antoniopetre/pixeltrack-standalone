@@ -7,6 +7,9 @@
 
 #include "Framework/ReusableObjectHolder.h"
 #include "AlpakaCore/SharedStreamPtr.h"
+#include "alpakaQueueHelper.h"
+#include "AlpakaCore/currentDevice.h"
+#include "AlpakaCore/deviceCount.h"
 
 class CUDAService;
 
@@ -21,8 +24,25 @@ namespace cms {
       // Gets a (cached) CUDA stream for the current device. The stream
       // will be returned to the cache by the shared_ptr destructor.
       // This function is thread safe
+      // template <typename T_Acc>
+      // SharedStreamPtr get(T_Acc acc);
+
       template <typename T_Acc>
-      SharedStreamPtr get(T_Acc acc);
+      SharedStreamPtr get(T_Acc acc) {
+
+        const auto dev = currentDevice();
+        // using AccQueueProperty = alpaka::NonBlocking;
+        // using QueueNon = alpaka::Queue<T_Acc, AccQueueProperty>;
+        auto stream = cms::alpakatools::createQueueNonBlocking<T_Acc>(acc);
+        return cache_[dev].makeOrGet([stream, dev, acc]() {
+        //   Queue stream;
+            // auto stream = cms::alpakatools::createQueueNonBlocking<T_Acc>(acc);
+          //cudaStreamCreateWithFlags(&stream, cudaStreamNonBlocking);
+            // return std::unique_ptr<BareStream, Deleter>(&stream, Deleter{dev});
+            //Todo antonio
+            return std::unique_ptr<BareStream, Deleter>(stream::element_type, Deleter{dev});
+        });
+      }
 
     private:
       friend class ::CUDAService;

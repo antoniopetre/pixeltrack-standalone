@@ -1,8 +1,8 @@
 #include "AlpakaCore/StreamCache.h"
-#include "AlpakaCore/currentDevice.h"
-#include "AlpakaCore/deviceCount.h"
+// #include "AlpakaCore/currentDevice.h"
+// #include "AlpakaCore/deviceCount.h"
 #include "AlpakaCore/ScopedSetDevice.h"
-#include "alpakaQueueHelper.h"
+// #include "alpakaQueueHelper.h"
 
 namespace cms::alpakatools {
   void StreamCache::Deleter::operator()(Queue *stream) const {
@@ -18,17 +18,17 @@ namespace cms::alpakatools {
   // getStreamCache() only if we have CUDA devices present
   StreamCache::StreamCache() : cache_(cms::alpakatools::deviceCount()) {}
 
-  template <typename T_Acc>
-  SharedStreamPtr StreamCache::get(T_Acc acc) {
+//   template <typename T_Acc>
+//   SharedStreamPtr StreamCache::get(T_Acc acc) {
 
-    const auto dev = currentDevice();
-    return cache_[dev].makeOrGet([dev, acc]() {
-    //   Queue stream;
-        auto stream = createQueueNonBlocking<T_Acc>(acc);
-      //cudaStreamCreateWithFlags(&stream, cudaStreamNonBlocking);
-      return std::unique_ptr<BareStream, Deleter>(stream, Deleter{dev});
-    });
-}
+//     const auto dev = currentDevice();
+//     return cache_[dev].makeOrGet([dev, acc]() {
+//     //   Queue stream;
+//         auto stream = createQueueNonBlocking<T_Acc>(acc);
+//       //cudaStreamCreateWithFlags(&stream, cudaStreamNonBlocking);
+//       return std::unique_ptr<BareStream, Deleter>(stream, Deleter{dev});
+//     });
+// }
 
   void StreamCache::clear() {
     // Reset the contents of the caches, but leave an

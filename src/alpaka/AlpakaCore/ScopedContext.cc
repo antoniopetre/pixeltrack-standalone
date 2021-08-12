@@ -1,7 +1,7 @@
 #include "AlpakaCore/ScopedContext.h"
 
-#include "AlpakaCore/StreamCache.h"
-#include "chooseDevice.h"
+// #include "AlpakaCore/StreamCache.h"
+// #include "chooseDevice.h"
 
 namespace {
   struct CallbackData {
@@ -38,13 +38,13 @@ void cudaScopedContextCallback(cms::alpakatools::Queue streamId, void* data) {
 
 namespace cms::alpakatools {
   namespace impl {
-    template <typename T_Acc>
-    ScopedContextBase::ScopedContextBase(T_Acc acc, edm::StreamID streamID) : currentDevice_(chooseDevice(streamID)) {
-    #ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
-      cudaSetDevice(currentDevice_);
-    #endif
-      stream_ = getStreamCache().get(acc);
-    }
+    // template <typename T_Acc>
+    // ScopedContextBase::ScopedContextBase(T_Acc acc, edm::StreamID streamID) : currentDevice_(chooseDevice(streamID)) {
+    // #ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
+    //   cudaSetDevice(currentDevice_);
+    // #endif
+    //   stream_ = getStreamCache().get(acc);
+    // }
 
     template <typename T_Acc>
     ScopedContextBase::ScopedContextBase(T_Acc acc, const ProductBase& data) : currentDevice_(data.device()) {

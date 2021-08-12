@@ -27,20 +27,11 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     auto const& bsRaw = iSetup.get<BeamSpotPOD>();
 
     // TO DO: Add inter-event parallelization. cms::alpaka::ScopedContextProduce?
-    cms::alpakatools::ScopedContextProduce ctx = cms::alpakatools::ScopedContextProduce(ALPAKA_ACCELERATOR_NAMESPACE::device, iEvent.streamID());
-    // Queue queue(device);
-    // cms::alpakatools::ScopedContextProduce ctx{iEvent.streamID()};
 
-    // BeamSpotAlpaka bsDevice(ctx.stream());
-    // cms::alpakatools::copyAsync(bsDevice.ptr(), bsHost, ctx.stream());
-
-    // ctx.emplace(iEvent, bsPutToken_, std::move(bsDevice));
-
-    // BeamSpotAlpaka bs{&bsRaw, queue};
-
-    // iEvent.emplace(bsPutToken_, std::move(bs));
-
-    // alpaka::wait(queue);
+    cms::alpakatools::ScopedContextProduce ctx{ALPAKA_ACCELERATOR_NAMESPACE::device, iEvent.streamID()};
+    BeamSpotAlpaka bsDevice(&bsRaw, ctx.stream());
+    ctx.emplace(ALPAKA_ACCELERATOR_NAMESPACE::device, iEvent, bsPutToken_, std::move(bsDevice));
+    // iEvent.emplace(bsPutToken_, std::move(bsDevice));
   }
 
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE
