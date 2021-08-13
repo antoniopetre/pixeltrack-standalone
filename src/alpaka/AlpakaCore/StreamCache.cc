@@ -1,18 +1,18 @@
 #include "AlpakaCore/StreamCache.h"
 // #include "AlpakaCore/currentDevice.h"
 // #include "AlpakaCore/deviceCount.h"
-#include "AlpakaCore/ScopedSetDevice.h"
+// #include "AlpakaCore/ScopedSetDevice.h"
 // #include "alpakaQueueHelper.h"
 
 namespace cms::alpakatools {
-  void StreamCache::Deleter::operator()(Queue *stream) const {
-    if (device_ != -1) {
-      ScopedSetDevice deviceGuard{device_};
-#ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
-      cudaStreamDestroy(*stream);
-#endif
-    }
-  }
+//   void StreamCache::Deleter::operator()(Queue *stream) const {
+//     if (device_ != -1) {
+//       ScopedSetDevice deviceGuard{device_};
+// #ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
+//       cudaStreamDestroy(*stream);
+// #endif
+//     }
+//   }
 
   // StreamCache should be constructed by the first call to
   // getStreamCache() only if we have CUDA devices present

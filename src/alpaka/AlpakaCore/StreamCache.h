@@ -10,6 +10,7 @@
 #include "alpakaQueueHelper.h"
 #include "AlpakaCore/currentDevice.h"
 #include "AlpakaCore/deviceCount.h"
+#include "AlpakaCore/ScopedSetDevice.h"
 
 class CUDAService;
 
@@ -31,22 +32,14 @@ namespace cms {
       ALPAKA_FN_HOST SharedStreamPtr get(T_Acc acc) {
 
         const auto dev = currentDevice();
-        using AccQueueProperty = alpaka::NonBlocking;
-        // using QueueNon = alpaka::Queue<T_Acc, AccQueueProperty>;
-        cms::alpakatools::Queue stream = cms::alpakatools::createQueueNonBlocking<T_Acc>(acc);
-        // SharedStreamPtr x(new cms::alpakatools::Queue(stream));
-        SharedStreamPtr x = std::make_shared<cms::alpakatools::Queue>(stream);
-        // SharedStreamPtr x(cms::alpakatools::Queue(stream));
-        // SharedStreamPtr x = std::make_shared<cms::alpakatools::Queue>();
-        // return cache_[dev].makeOrGet([stream, dev, acc]() {
-        //   Queue stream;
-            // auto stream = cms::alpakatools::createQueueNonBlocking<T_Acc>(acc);
+        return cache_[dev].makeOrGet([dev, acc]() {
+          cms::alpakatools::Queue stream = cms::alpakatools::createQueueNonBlocking<T_Acc>(acc);
           //cudaStreamCreateWithFlags(&stream, cudaStreamNonBlocking);
             // return std::unique_ptr<BareStream, Deleter>(&stream, Deleter{dev});
             //Todo antonio
-            // return std::unique_ptr<BareStream>(&stream);
-        // });
-        return x;
+            return std::unique_ptr<BareStream, Deleter>(&stream,  Deleter{dev});
+        });
+        // return x;
       }
 
     private:
@@ -58,7 +51,15 @@ namespace cms {
       public:
         Deleter() = default;
         Deleter(int d) : device_{d} {}
-        void operator()(Queue *stream) const;
+        // void operator()(Queue *stream) const;
+        void operator()(Queue *stream) const {
+      //     if (device_ != -1) {
+      //       ScopedSetDevice deviceGuard{device_};
+      // #ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
+      //       cudaStreamDestroy(*stream);
+      // #endif
+      //     }
+        }
 
       private:
         int device_ = -1;
