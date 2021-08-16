@@ -29,7 +29,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     // TO DO: Add inter-event parallelization. cms::alpaka::ScopedContextProduce?
 
     cms::alpakatools::ScopedContextProduce ctx{ALPAKA_ACCELERATOR_NAMESPACE::device, iEvent.streamID()};
-    alpaka::wait(ctx.stream());
+    alpaka::wait(*ctx.stream());
     // BeamSpotAlpaka bsDevice(&bsRaw, ctx.stream());
     // ctx.emplace(ALPAKA_ACCELERATOR_NAMESPACE::device, iEvent, bsPutToken_, std::move(bsDevice));
   }

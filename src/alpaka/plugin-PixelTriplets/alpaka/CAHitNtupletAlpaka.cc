@@ -39,7 +39,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
     // Queue queue(device);
     // iEvent.emplace(tokenTrackGPU_, gpuAlgo_.makeTuplesAsync(hits, bf, queue));
     cms::alpakatools::ScopedContextProduce ctx{ALPAKA_ACCELERATOR_NAMESPACE::device, iEvent.streamID()};
-    ctx.emplace(ALPAKA_ACCELERATOR_NAMESPACE::device, iEvent, tokenTrackGPU_, gpuAlgo_.makeTuplesAsync(hits, bf, ctx.stream()));
+    ctx.emplace(ALPAKA_ACCELERATOR_NAMESPACE::device, iEvent, tokenTrackGPU_, gpuAlgo_.makeTuplesAsync(hits, bf, *ctx.stream()));
   }
 
 }  // namespace ALPAKA_ACCELERATOR_NAMESPACE

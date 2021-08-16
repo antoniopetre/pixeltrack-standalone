@@ -46,7 +46,7 @@ namespace cms {
       // mutable access is needed even if the cms::alpakatools::ScopedContext itself
       // would be const. Therefore it is ok to return a non-const
       // pointer from a const method here.
-      Queue stream() const { return *(stream_.get()); }
+      Queue *stream() const { return *(stream_.get()); }
 
       // cudaEvent_t is a pointer to a thread-safe object, for which a
       // mutable access is needed even if the cms::alpakatools::ScopedContext itself

@@ -14,6 +14,7 @@
 #include "AlpakaCore/SharedStreamPtr.h"
 #include "chooseDevice.h"
 #include "AlpakaCore/StreamCache.h"
+#include "Framework/ReusableObjectHolder.h"
 
 namespace cms {
   namespace alpakatest {
@@ -32,7 +33,7 @@ namespace cms {
         // mutable access is needed even if the ScopedContext itself
         // would be const. Therefore it is ok to return a non-const
         // pointer from a const method here.
-        Queue stream() const { return *(stream_.get()); }
+        Queue *stream() const { return *(stream_.get()); }
         const SharedStreamPtr& streamPtr() const { return stream_; }
 
       protected:
@@ -52,9 +53,9 @@ namespace cms {
         // explicit ScopedContextBase(int device, SharedStreamPtr stream);
         explicit ScopedContextBase(int device, SharedStreamPtr stream)
         : currentDevice_(device), stream_(std::move(stream)) {
-        #ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
-          cudaSetDevice(currentDevice_);
-        #endif
+          #ifdef ALPAKA_ACC_GPU_CUDA_ENABLED
+            cudaSetDevice(currentDevice_);
+          #endif
         }
 
         // template <typename T_Acc>
@@ -66,7 +67,14 @@ namespace cms {
           cudaSetDevice(currentDevice_);
         #endif
           stream_ = getStreamCache().get(acc);
+          // if (stream_ == nullptr) printf("ceee\n");
+          // if (stream_.get() == nullptr) printf("ceee2\n");
+          // printf("alpaka2:%d\n", alpaka::empty(*(stream_.get())));
+          // alpaka::wait(*(stream_.get()));
           //TODO ANTONIO
+          // cms::alpakatools::Queue stream = cms::alpakatools::createQueueNonBlocking<T_Acc>(acc);
+          // SharedStreamPtr x = std::make_shared<cms::alpakatools::Queue>(stream);
+          // stream_ = x;
         }
 
       private:
@@ -216,8 +224,8 @@ namespace cms {
 
       // This construcor is only meant for testing
       
-      // explicit ScopedContextProduce(int device, SharedStreamPtr stream, SharedEventPtr event)
-      //     : ScopedContextGetterBase(device, std::move(stream)), event_{std::move(event)} {}
+      explicit ScopedContextProduce(int device, SharedStreamPtr stream, SharedEventPtr event)
+          : ScopedContextGetterBase(device, std::move(stream)), event_{std::move(event)} {}
 
       // TODO ANTONIO
 
@@ -229,6 +237,7 @@ namespace cms {
         return getEventCache().get(acc);
       }
 
+      SharedEventPtr event_;
       // create the CUDA Event upfront to catch possible errors from its creation
     };
 

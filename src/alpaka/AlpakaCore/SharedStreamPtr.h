@@ -17,7 +17,7 @@ namespace cms {
 #else 
   using Queue = alpaka::QueueCpuBlocking;
 #endif
-    using SharedStreamPtr = std::shared_ptr<Queue>;
+    using SharedStreamPtr = std::shared_ptr<Queue*>;
   }  // namespace alpakatools
 }  // namespace cms
 

@@ -153,7 +153,7 @@ namespace ALPAKA_ACCELERATOR_NAMESPACE {
                                useQuality_,
                                includeErrors_,
                                false,  // debug
-                               ctx.stream());
+                               *ctx.stream());
 
     auto tmp = gpuAlgo_.getResults();
     ctx.emplace(ALPAKA_ACCELERATOR_NAMESPACE::device, iEvent, digiPutToken_, std::move(tmp.first));

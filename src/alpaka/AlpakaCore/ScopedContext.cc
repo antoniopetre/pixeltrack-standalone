@@ -77,7 +77,7 @@ namespace cms::alpakatools {
         throw std::runtime_error("Handling data from multiple devices is not yet supported");
       }
 
-      if (dataStream != stream()) {
+      if (dataStream != *stream()) {
         // Different streams, need to synchronize
         if (not available) {
           // Event not yet occurred, so need to add synchronization
@@ -107,7 +107,7 @@ namespace cms::alpakatools {
   ////////////////////
 
   ScopedContextAcquire::~ScopedContextAcquire() {
-    holderHelper_.enqueueCallback(device(), stream());
+    holderHelper_.enqueueCallback(device(), *stream());
     if (contextState_) {
       contextState_->set(device(), streamPtr());
     }
@@ -132,5 +132,5 @@ namespace cms::alpakatools {
 
   ////////////////////
 
-  ScopedContextTask::~ScopedContextTask() { holderHelper_.enqueueCallback(device(), stream()); }
+  ScopedContextTask::~ScopedContextTask() { holderHelper_.enqueueCallback(device(), *stream()); }
 }  // namespace cms::alpakatools

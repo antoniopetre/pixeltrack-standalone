@@ -1,6 +1,8 @@
 #ifndef FWCore_Utilities_ReusableObjectHolder_h
 #define FWCore_Utilities_ReusableObjectHolder_h
 
+#include "AlpakaCore/alpakaConfigCommon.h"
+
 // -*- C++ -*-
 //
 // Package:     FWCore/Utilities
@@ -98,9 +100,22 @@ namespace edm {
     /// Use this function if you know ahead of time
     /// how many cached items you will need.
     void add(std::unique_ptr<T, Deleter> iItem) {
+      printf("add\n");
       if (nullptr != iItem) {
+        printf("add2\n");
         m_availableQueue.push(std::move(iItem));
+        printf("add3\n");
       }
+      // std::unique_ptr<T, Deleter> item;
+      // if (m_availableQueue.try_pop(item)) {
+      //   printf("before pop\n");
+      //   alpaka::wait(*(item.get()));
+      //   printf("pop func\n");
+      // }
+      // printf("size = %d\n", m_availableQueue.unsafe_size());
+      // if (m_availableQueue.empty()) {
+      //   printf("empty queue\n");
+      // }
     }
 
     ///Tries to get an already created object,
@@ -126,7 +141,9 @@ namespace edm {
     std::shared_ptr<T> makeOrGet(F iFunc) {
       std::shared_ptr<T> returnValue;
       while (!(returnValue = tryToGet())) {
+        printf("alpaka2\n");
         add(makeUnique(iFunc()));
+        printf("alpaka3\n");
       }
       return returnValue;
     }
@@ -146,12 +163,16 @@ namespace edm {
 
   private:
     std::unique_ptr<T> makeUnique(T* ptr) {
+      printf("makeUnique2\n");
       static_assert(std::is_same_v<Deleter, std::default_delete<T>>,
                     "Generating functions returning raw pointers are supported only with std::default_delete<T>");
+      printf("makeUnique\n");
       return std::unique_ptr<T>{ptr};
     }
 
-    std::unique_ptr<T, Deleter> makeUnique(std::unique_ptr<T, Deleter> ptr) { return ptr; }
+    std::unique_ptr<T, Deleter> makeUnique(std::unique_ptr<T, Deleter> ptr) { 
+      printf("makeUnique3\n");
+      return ptr; }
 
     void addBack(std::unique_ptr<T, Deleter> iItem) {
       m_availableQueue.push(std::move(iItem));
